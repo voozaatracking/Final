@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Download, Search, Database, Users, BarChart3, TrendingUp, FileText, MapPin, LogOut, Calendar } from 'lucide-react';
+import { Plus, Trash2, Download, Search, Database, Users, BarChart3, TrendingUp, FileText, MapPin, LogOut, Calendar, RotateCcw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { storage } from '../lib/supabase';
 
@@ -83,6 +83,8 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
 
 const DeviceTracker = ({ onLogout }) => {
   const [devices, setDevices] = useState([]);
+  const [deletedDevices, setDeletedDevices] = useState([]); // Papierkorb
+  const [showTrashModal, setShowTrashModal] = useState(false);
   const [employees, setEmployees] = useState([
     'FSEGO', 'Mitarbeiter 2', 'Mitarbeiter 3', 'Mitarbeiter 4', 'Mitarbeiter 5',
     'Mitarbeiter 6', 'Mitarbeiter 7', 'Mitarbeiter 8', 'Mitarbeiter 9', 'Mitarbeiter 10'
@@ -182,6 +184,7 @@ const DeviceTracker = ({ onLogout }) => {
     const loadData = async () => {
       try {
         const devicesData = await storage.get('devices');
+        const deletedDevicesData = await storage.get('deletedDevices');
         const employeesData = await storage.get('employees');
         const addressesData = await storage.get('addresses');
         const yearsData = await storage.get('availableYears');
@@ -221,6 +224,10 @@ const DeviceTracker = ({ onLogout }) => {
             setEmployees(loadedEmployees);
           }
         }
+
+        if (deletedDevicesData && deletedDevicesData.value) {
+          setDeletedDevices(JSON.parse(deletedDevicesData.value));
+        }
         
         if (addressesData && addressesData.value) {
           setAddresses(JSON.parse(addressesData.value));
@@ -241,6 +248,7 @@ const DeviceTracker = ({ onLogout }) => {
       if (devices.length > 0) {
         try {
           await storage.set('devices', JSON.stringify(devices));
+          await storage.set('deletedDevices', JSON.stringify(deletedDevices));
           await storage.set('employees', JSON.stringify(employees));
           await storage.set('addresses', JSON.stringify(addresses));
           await storage.set('availableYears', JSON.stringify(availableYears));
@@ -252,7 +260,7 @@ const DeviceTracker = ({ onLogout }) => {
       }
     };
     saveData();
-  }, [devices, employees, addresses, availableYears]);
+  }, [devices, deletedDevices, employees, addresses, availableYears]);
 
   const addDevice = () => {
     const newDevice = {
@@ -263,7 +271,47 @@ const DeviceTracker = ({ onLogout }) => {
   };
 
   const deleteDevice = (id) => {
-    setDevices(devices.filter(d => d.id !== id));
+    const deviceToDelete = devices.find(d => d.id === id);
+    if (deviceToDelete) {
+      // Add deletion timestamp
+      const deletedDevice = {
+        ...deviceToDelete,
+        deletedAt: new Date().toISOString()
+      };
+      setDeletedDevices([deletedDevice, ...deletedDevices]);
+      setDevices(devices.filter(d => d.id !== id));
+      setSaveStatus('üóëÔ∏è Ger√§t in Papierkorb verschoben');
+      setTimeout(() => setSaveStatus(''), 2000);
+    }
+  };
+
+  // Restore device from trash
+  const restoreDevice = (id) => {
+    const deviceToRestore = deletedDevices.find(d => d.id === id);
+    if (deviceToRestore) {
+      // Remove deletedAt timestamp
+      const { deletedAt, ...restoredDevice } = deviceToRestore;
+      setDevices([...devices, restoredDevice]);
+      setDeletedDevices(deletedDevices.filter(d => d.id !== id));
+      setSaveStatus('‚úì Ger√§t wiederhergestellt');
+      setTimeout(() => setSaveStatus(''), 2000);
+    }
+  };
+
+  // Permanently delete device from trash
+  const permanentlyDeleteDevice = (id) => {
+    setDeletedDevices(deletedDevices.filter(d => d.id !== id));
+    setSaveStatus('‚úì Ger√§t endg√ºltig gel√∂scht');
+    setTimeout(() => setSaveStatus(''), 2000);
+  };
+
+  // Empty entire trash
+  const emptyTrash = () => {
+    if (deletedDevices.length > 0 && confirm('Papierkorb wirklich leeren? Dies kann nicht r√ºckg√§ngig gemacht werden!')) {
+      setDeletedDevices([]);
+      setSaveStatus('‚úì Papierkorb geleert');
+      setTimeout(() => setSaveStatus(''), 2000);
+    }
   };
 
   const addAddress = () => {
@@ -596,6 +644,15 @@ const DeviceTracker = ({ onLogout }) => {
             <button onClick={exportData} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm transition-all">
               <Download size={16} />
               Backup
+            </button>
+            <button onClick={() => setShowTrashModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition-all relative">
+              <Trash2 size={16} />
+              Papierkorb
+              {deletedDevices.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {deletedDevices.length}
+                </span>
+              )}
             </button>
             {onLogout && (
               <button onClick={onLogout} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm transition-all">
@@ -1245,6 +1302,102 @@ const DeviceTracker = ({ onLogout }) => {
                   })}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Trash Modal (Papierkorb) */}
+        {showTrashModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+              <div className="p-4 border-b flex justify-between items-center bg-gray-100">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Trash2 size={20} className="text-gray-600" />
+                  Papierkorb ({deletedDevices.length} Ger√§te)
+                </h2>
+                <div className="flex items-center gap-2">
+                  {deletedDevices.length > 0 && (
+                    <button onClick={emptyTrash} className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 flex items-center gap-1">
+                      <Trash2 size={14} />
+                      Papierkorb leeren
+                    </button>
+                  )}
+                  <button onClick={() => setShowTrashModal(false)} className="text-gray-500 hover:text-gray-700 text-xl px-2">‚úï</button>
+                </div>
+              </div>
+              
+              {deletedDevices.length === 0 ? (
+                <div className="p-12 text-center text-gray-500">
+                  <Trash2 size={48} className="mx-auto mb-4 opacity-30" />
+                  <p className="text-lg font-medium">Papierkorb ist leer</p>
+                  <p className="text-sm">Gel√∂schte Ger√§te werden hier angezeigt</p>
+                </div>
+              ) : (
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {deletedDevices.map(device => {
+                      const deletedDate = new Date(device.deletedAt);
+                      const formattedDate = deletedDate.toLocaleDateString('de-DE', { 
+                        day: '2-digit', month: '2-digit', year: 'numeric', 
+                        hour: '2-digit', minute: '2-digit' 
+                      });
+                      const yearRevenue = months.reduce((sum, m) => {
+                        if (device.revenue && device.revenue[selectedYear]) {
+                          return sum + (parseFloat(device.revenue[selectedYear][m]) || 0);
+                        }
+                        return sum;
+                      }, 0);
+                      
+                      return (
+                        <div key={device.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-200 rounded-lg p-2">
+                                <Database size={20} className="text-gray-500" />
+                              </div>
+                              <div>
+                                <div className="font-semibold text-gray-800">
+                                  {device.deviceNumber || 'Ohne Nummer'}
+                                  <span className="ml-2 text-sm font-normal text-gray-500">({device.deviceType || 'Kein Typ'})</span>
+                                </div>
+                                <div className="text-sm text-gray-600">{device.partnerName || 'Kein Partner'}</div>
+                                <div className="text-xs text-gray-400">{device.address || 'Keine Adresse'}</div>
+                              </div>
+                            </div>
+                            <div className="mt-2 flex items-center gap-4 text-xs">
+                              <span className="text-gray-500">
+                                üóëÔ∏è Gel√∂scht: {formattedDate}
+                              </span>
+                              <span className="text-gray-500">
+                                üë§ Owner: {device.owner || '-'}
+                              </span>
+                              <span className="text-green-600 font-medium">
+                                üí∞ Umsatz {selectedYear}: ‚Ç¨{yearRevenue.toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <button 
+                              onClick={() => restoreDevice(device.id)}
+                              className="flex items-center gap-1.5 px-3 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-all"
+                            >
+                              <RotateCcw size={14} />
+                              Wiederherstellen
+                            </button>
+                            <button 
+                              onClick={() => permanentlyDeleteDevice(device.id)}
+                              className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-all"
+                            >
+                              <Trash2 size={14} />
+                              Endg√ºltig l√∂schen
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
