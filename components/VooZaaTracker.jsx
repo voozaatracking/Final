@@ -112,9 +112,9 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
       </div>
       <div className="text-[10px] text-center mt-1">
         <span className={isComplete ? 'text-green-600 font-semibold' : 'text-gray-500'}>
-          {revenue.toFixed(0)} ‚Ç¨
+          {revenue.toFixed(0)} EUR
         </span>
-        <span className="text-gray-400"> / {target} ‚Ç¨</span>
+        <span className="text-gray-400"> / {target} EUR</span>
       </div>
     </div>
   );
@@ -818,17 +818,17 @@ const DeviceTracker = ({ onLogout }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Jahresumsatz {selectedYear}</div>
-                <div className="text-2xl font-bold text-slate-800">{totalRevenue.toFixed(0)} ‚Ç¨</div>
-                <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenue * 0.1).toFixed(0)} ‚Ç¨</div>
+                <div className="text-2xl font-bold text-slate-800">{totalRevenue.toFixed(0)} EUR</div>
+                <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenue * 0.1).toFixed(0)} EUR</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">{monthNames[currentMonth]} {selectedYear}</div>
-                <div className="text-2xl font-bold text-blue-600">{currentMonthRevenue.toFixed(0)} ‚Ç¨</div>
+                <div className="text-2xl font-bold text-blue-600">{currentMonthRevenue.toFixed(0)} EUR</div>
                 <div className="text-xs text-slate-500">Aktueller Monat</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Q{currentQuarterNumber} {selectedYear}</div>
-                <div className="text-2xl font-bold text-purple-600">{quarterRevenue.toFixed(0)} ‚Ç¨</div>
+                <div className="text-2xl font-bold text-purple-600">{quarterRevenue.toFixed(0)} EUR</div>
                 <div className="text-xs text-slate-500">Quartal</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
@@ -842,7 +842,7 @@ const DeviceTracker = ({ onLogout }) => {
             <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200 mb-4">
               <h3 className="text-sm font-semibold mb-3 text-slate-700 flex items-center gap-2">
                 ROI Uebersicht {selectedYear}
-                <span className="text-xs font-normal text-gray-500">(Ziel: 1.500 ‚Ç¨ pro Geraet)</span>
+                <span className="text-xs font-normal text-gray-500">(Ziel: 1.500 EUR pro Geraet)</span>
               </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-green-50 rounded-lg">
@@ -921,7 +921,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <div className={`font-bold text-center text-sm ${isCurrentMonth ? 'text-blue-700' : 'text-slate-600'}`}>
                         {monthNames[idx]}
                       </div>
-                      <div className="text-center font-semibold text-slate-800 text-sm">{mRevenue.toFixed(0)} ‚Ç¨</div>
+                      <div className="text-center font-semibold text-slate-800 text-sm">{mRevenue.toFixed(0)} EUR</div>
                       {idx > 0 && (
                         <div className={`text-center text-xs ${parseFloat(revChange) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {parseFloat(revChange) >= 0 ? '+' : ''}{revChangePercent}%
@@ -944,7 +944,7 @@ const DeviceTracker = ({ onLogout }) => {
               ROI Uebersicht {selectedYear}
             </h2>
             <p className="text-sm text-gray-500 mb-4">
-              Ziel: 1.500 ‚Ç¨ pro Geraet = 100% ROI (abgezahlt). Bei 3.000 ‚Ç¨ = 200% ROI.
+              Ziel: 1.500 EUR pro Geraet = 100% ROI (abgezahlt). Bei 3.000 EUR = 200% ROI.
             </p>
             
             {/* ROI Summary */}
@@ -1020,11 +1020,11 @@ const DeviceTracker = ({ onLogout }) => {
               <select value={trafficLightFilter} onChange={(e) => setTrafficLightFilter(e.target.value)}
                 className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
                 <option value="all">Alle Status</option>
-                <option value="super">Super (120+ ‚Ç¨)</option>
-                <option value="gut">Gut (95-120 ‚Ç¨)</option>
-                <option value="ok">OK (60-95 ‚Ç¨)</option>
-                <option value="schwach">Schwach (30-60 ‚Ç¨)</option>
-                <option value="kritisch">Kritisch (0-30 ‚Ç¨)</option>
+                <option value="super">Super (120+ EUR)</option>
+                <option value="gut">Gut (95-120 EUR)</option>
+                <option value="ok">OK (60-95 EUR)</option>
+                <option value="schwach">Schwach (30-60 EUR)</option>
+                <option value="kritisch">Kritisch (0-30 EUR)</option>
               </select>
             </div>
             <div className="overflow-x-auto border rounded-lg">
@@ -1035,7 +1035,7 @@ const DeviceTracker = ({ onLogout }) => {
                     <th className="p-3 text-left font-semibold">Typ</th>
                     <th className="p-3 text-left font-semibold">Partner</th>
                     <th className="p-3 text-left font-semibold">Owner</th>
-                    <th className="p-3 text-center font-semibold">{monthNames[currentMonth]} ‚Ç¨</th>
+                    <th className="p-3 text-center font-semibold">{monthNames[currentMonth]} EUR</th>
                     <th className="p-3 text-center font-semibold">Status</th>
                     <th className="p-3 text-center font-semibold">ROI</th>
                     <th className="p-3 text-left font-semibold">Jahresumsatz</th>
@@ -1051,14 +1051,14 @@ const DeviceTracker = ({ onLogout }) => {
                         <td className="p-3">{device.deviceType || '-'}</td>
                         <td className="p-3 font-medium">{device.partnerName || '-'}</td>
                         <td className="p-3">{device.owner || '-'}</td>
-                        <td className="p-3 text-center font-semibold">{monthRev.toFixed(0)} ‚Ç¨</td>
+                        <td className="p-3 text-center font-semibold">{monthRev.toFixed(0)} EUR</td>
                         <td className="p-3">
                           <TrafficLight revenue={monthRev} />
                         </td>
                         <td className="p-3">
                           <ROICircle revenue={yearRev} target={1500} size={60} />
                         </td>
-                        <td className="p-3 font-semibold text-green-600">{yearRev.toFixed(2)} ‚Ç¨</td>
+                        <td className="p-3 font-semibold text-green-600">{yearRev.toFixed(2)} EUR</td>
                       </tr>
                     );
                   })}
@@ -1127,11 +1127,11 @@ const DeviceTracker = ({ onLogout }) => {
                           </td>
                           <td className="p-3 text-center">{emp.deviceCount}</td>
                           <td className="p-3 text-center">{emp.avgHours}h</td>
-                          <td className="p-3 text-right">{emp.monthRevenue} ‚Ç¨</td>
-                          <td className="p-3 text-right">{emp.quarterRevenue} ‚Ç¨</td>
-                          <td className="p-3 text-right font-semibold">{emp.yearRevenue} ‚Ç¨</td>
+                          <td className="p-3 text-right">{emp.monthRevenue} EUR</td>
+                          <td className="p-3 text-right">{emp.quarterRevenue} EUR</td>
+                          <td className="p-3 text-right font-semibold">{emp.yearRevenue} EUR</td>
                           <td className="p-3 text-right font-bold text-green-600">
-                            {isFSEGO ? '-' : `${emp.monthlyPayout} ‚Ç¨`}
+                            {isFSEGO ? '-' : `${emp.monthlyPayout} EUR`}
                           </td>
                           <td className="p-3 text-center">
                             {editingEmployee !== idx && (
@@ -1150,13 +1150,13 @@ const DeviceTracker = ({ onLogout }) => {
                       <td className="p-3">GESAMT</td>
                       <td className="p-3 text-center">{employeeStats.reduce((sum, e) => sum + e.deviceCount, 0)}</td>
                       <td className="p-3 text-center">-</td>
-                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.monthRevenue), 0).toFixed(2)} ‚Ç¨</td>
-                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.quarterRevenue), 0).toFixed(2)} ‚Ç¨</td>
-                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.yearRevenue), 0).toFixed(2)} ‚Ç¨</td>
-                      <td className="p-3 text-right text-emerald-700">{employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)} ‚Ç¨</td>
+                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.monthRevenue), 0).toFixed(2)} EUR</td>
+                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.quarterRevenue), 0).toFixed(2)} EUR</td>
+                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.yearRevenue), 0).toFixed(2)} EUR</td>
+                      <td className="p-3 text-right text-emerald-700">{employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)} EUR</td>
                       <td className="p-3 text-center">
                         <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
-                          20%: {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)} ‚Ç¨
+                          20%: {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)} EUR
                         </span>
                       </td>
                     </tr>
@@ -1178,7 +1178,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`${value} ‚Ç¨`, '']} />
+                      <Tooltip formatter={(value) => [`${value} EUR`, '']} />
                       <Legend />
                       {employees.map((emp, idx) => (
                         <Line key={emp} type="monotone" dataKey={emp} stroke={colors[idx]} strokeWidth={2} dot={{ r: 3 }} />
@@ -1202,7 +1202,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`${value} ‚Ç¨`, '']} />
+                      <Tooltip formatter={(value) => [`${value} EUR`, '']} />
                       <Legend />
                       {employees.map((emp, idx) => (
                         <Line key={emp} type="monotone" dataKey={emp} stroke={colors[idx]} strokeWidth={2} dot={{ r: 3 }} />
@@ -1407,11 +1407,11 @@ const DeviceTracker = ({ onLogout }) => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Gesamtumsatz</div>
-                    <div className="text-2xl font-bold">{reportData.monthRevenue.toFixed(2)} ‚Ç¨</div>
+                    <div className="text-2xl font-bold">{reportData.monthRevenue.toFixed(2)} EUR</div>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Provision (10%)</div>
-                    <div className="text-2xl font-bold">{reportData.provision.toFixed(2)} ‚Ç¨</div>
+                    <div className="text-2xl font-bold">{reportData.provision.toFixed(2)} EUR</div>
                   </div>
                 </div>
                 <div className="mb-4">
@@ -1425,7 +1425,7 @@ const DeviceTracker = ({ onLogout }) => {
                     <strong>Top 3 Geraete:</strong>
                     <ul className="list-disc list-inside mt-2">
                       {reportData.top3Devices.map((d, i) => (
-                        <li key={i}>{d.deviceNumber} - {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)} ‚Ç¨</li>
+                        <li key={i}>{d.deviceNumber} - {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)} EUR</li>
                       ))}
                     </ul>
                   </div>
@@ -1557,7 +1557,7 @@ const DeviceTracker = ({ onLogout }) => {
                                 Owner: {device.owner || '-'}
                               </span>
                               <span className="text-green-600 font-medium">
-                                Umsatz {selectedYear}: {yearRevenue.toFixed(0)} ‚Ç¨
+                                Umsatz {selectedYear}: {yearRevenue.toFixed(0)} EUR
                               </span>
                             </div>
                           </div>
@@ -1593,3 +1593,4 @@ const DeviceTracker = ({ onLogout }) => {
 };
 
 export default DeviceTracker;
+
