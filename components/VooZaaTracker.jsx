@@ -73,9 +73,9 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
       </div>
       <div className="text-[10px] text-center mt-1">
         <span className={isComplete ? 'text-green-600 font-semibold' : 'text-gray-500'}>
-          ‚Ç¨{revenue.toFixed(0)}
+          EUR {revenue.toFixed(0)}
         </span>
-        <span className="text-gray-400"> / ‚Ç¨{target}</span>
+        <span className="text-gray-400"> / EUR {target}</span>
       </div>
     </div>
   );
@@ -90,10 +90,10 @@ const DeviceTracker = ({ onLogout }) => {
     'Mitarbeiter 6', 'Mitarbeiter 7', 'Mitarbeiter 8', 'Mitarbeiter 9', 'Mitarbeiter 10'
   ]);
   const [addresses, setAddresses] = useState([
-    { id: 1, name: 'Hauptstandort', street: 'Musterstra√üe 1', zip: '21335', city: 'L√ºneburg' },
-    { id: 2, name: 'Filiale Nord', street: 'Beispielweg 5', zip: '21335', city: 'L√ºneburg' },
-    { id: 3, name: 'Filiale S√ºd', street: 'Hauptstra√üe 10', zip: '21337', city: 'L√ºneburg' },
-    { id: 4, name: 'Bahnhof', street: 'Bahnhofstra√üe 3', zip: '21339', city: 'L√ºneburg' },
+    { id: 1, name: 'Hauptstandort', street: 'Musterstrasse 1', zip: '21335', city: 'Lueneburg' },
+    { id: 2, name: 'Filiale Nord', street: 'Beispielweg 5', zip: '21335', city: 'Lueneburg' },
+    { id: 3, name: 'Filiale Sued', street: 'Hauptstrasse 10', zip: '21337', city: 'Lueneburg' },
+    { id: 4, name: 'Bahnhof', street: 'Bahnhofstrasse 3', zip: '21339', city: 'Lueneburg' },
   ]);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [editName, setEditName] = useState('');
@@ -105,11 +105,11 @@ const DeviceTracker = ({ onLogout }) => {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importText, setImportText] = useState('');
-  const [newAddress, setNewAddress] = useState({ name: '', street: '', zip: '', city: 'L√ºneburg' });
+  const [newAddress, setNewAddress] = useState({ name: '', street: '', zip: '', city: 'Lueneburg' });
 
   const deviceTypes = ['12 slot', '24 slot', '28 slot'];
   const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-  const monthNames = ['Jan', 'Feb', 'M√§r', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  const monthNames = ['Jan', 'Feb', 'Maer', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
   const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
 
   const today = new Date();
@@ -196,22 +196,22 @@ const DeviceTracker = ({ onLogout }) => {
         } else {
           setDevices([
             {
-              id: 1, deviceNumber: 'DEV001', deviceType: '12 slot', address: 'Musterstra√üe 1, 21335 L√ºneburg',
+              id: 1, deviceNumber: 'DEV001', deviceType: '12 slot', address: 'Musterstrasse 1, 21335 Lueneburg',
               partnerName: 'Partner A', owner: 'FSEGO', hours: 5,
               revenue: { 2026: { jan: 1000, feb: 1500, mar: 1200, apr: 1800, may: 1600, jun: 2000, jul: 1900, aug: 2100, sep: 1700, oct: 1800, nov: 2200, dec: 2400 } }
             },
             {
-              id: 2, deviceNumber: 'DEV002', deviceType: '24 slot', address: 'Beispielweg 5, 21335 L√ºneburg',
+              id: 2, deviceNumber: 'DEV002', deviceType: '24 slot', address: 'Beispielweg 5, 21335 Lueneburg',
               partnerName: 'Partner B', owner: 'Mitarbeiter 2', hours: 7,
               revenue: { 2026: { jan: 800, feb: 1200, mar: 1000, apr: 1400, may: 1300, jun: 1600, jul: 1500, aug: 1700, sep: 1400, oct: 1500, nov: 1800, dec: 2000 } }
             },
             {
-              id: 3, deviceNumber: 'DEV003', deviceType: '28 slot', address: 'Hauptstra√üe 10, 21337 L√ºneburg',
+              id: 3, deviceNumber: 'DEV003', deviceType: '28 slot', address: 'Hauptstrasse 10, 21337 Lueneburg',
               partnerName: 'Partner A', owner: 'FSEGO', hours: 8,
               revenue: { 2026: { jan: 1200, feb: 1800, mar: 1500, apr: 2000, may: 1900, jun: 2200, jul: 2100, aug: 2400, sep: 2000, oct: 2100, nov: 2500, dec: 2800 } }
             },
             {
-              id: 4, deviceNumber: 'DEV004', deviceType: '12 slot', address: 'Bahnhofstra√üe 3, 21339 L√ºneburg',
+              id: 4, deviceNumber: 'DEV004', deviceType: '12 slot', address: 'Bahnhofstrasse 3, 21339 Lueneburg',
               partnerName: 'Partner C', owner: 'Mitarbeiter 3', hours: 4,
               revenue: { 2026: { jan: 600, feb: 900, mar: 750, apr: 1100, may: 950, jun: 1200, jul: 1100, aug: 1300, sep: 1050, oct: 1150, nov: 1400, dec: 1600 } }
             }
@@ -280,7 +280,7 @@ const DeviceTracker = ({ onLogout }) => {
       };
       setDeletedDevices([deletedDevice, ...deletedDevices]);
       setDevices(devices.filter(d => d.id !== id));
-      setSaveStatus('üóëÔ∏è Ger√§t in Papierkorb verschoben');
+      setSaveStatus('üóëÔ∏è Geraet in Papierkorb verschoben');
       setTimeout(() => setSaveStatus(''), 2000);
     }
   };
@@ -293,7 +293,7 @@ const DeviceTracker = ({ onLogout }) => {
       const { deletedAt, ...restoredDevice } = deviceToRestore;
       setDevices([...devices, restoredDevice]);
       setDeletedDevices(deletedDevices.filter(d => d.id !== id));
-      setSaveStatus('‚úì Ger√§t wiederhergestellt');
+      setSaveStatus('‚úì Geraet wiederhergestellt');
       setTimeout(() => setSaveStatus(''), 2000);
     }
   };
@@ -301,13 +301,13 @@ const DeviceTracker = ({ onLogout }) => {
   // Permanently delete device from trash
   const permanentlyDeleteDevice = (id) => {
     setDeletedDevices(deletedDevices.filter(d => d.id !== id));
-    setSaveStatus('‚úì Ger√§t endg√ºltig gel√∂scht');
+    setSaveStatus('‚úì Geraet endgueltig geloescht');
     setTimeout(() => setSaveStatus(''), 2000);
   };
 
   // Empty entire trash
   const emptyTrash = () => {
-    if (deletedDevices.length > 0 && confirm('Papierkorb wirklich leeren? Dies kann nicht r√ºckg√§ngig gemacht werden!')) {
+    if (deletedDevices.length > 0 && confirm('Papierkorb wirklich leeren? Dies kann nicht rueckgaengig gemacht werden!')) {
       setDeletedDevices([]);
       setSaveStatus('‚úì Papierkorb geleert');
       setTimeout(() => setSaveStatus(''), 2000);
@@ -317,7 +317,7 @@ const DeviceTracker = ({ onLogout }) => {
   const addAddress = () => {
     if (newAddress.name && newAddress.street && newAddress.zip && newAddress.city) {
       setAddresses([...addresses, { id: Date.now(), ...newAddress }]);
-      setNewAddress({ name: '', street: '', zip: '', city: 'L√ºneburg' });
+      setNewAddress({ name: '', street: '', zip: '', city: 'Lueneburg' });
       setShowAddressModal(false);
     }
   };
@@ -380,7 +380,7 @@ const DeviceTracker = ({ onLogout }) => {
       setDevices(updatedDevices);
       setImportText('');
       setShowImportModal(false);
-      setSaveStatus(`‚úì ${importCount} Eintr√§ge importiert f√ºr ${selectedYear}`);
+      setSaveStatus(`‚úì ${importCount} Eintraege importiert fuer ${selectedYear}`);
       setTimeout(() => setSaveStatus(''), 3000);
     }
   };
@@ -598,7 +598,7 @@ const DeviceTracker = ({ onLogout }) => {
           <div className="flex flex-wrap justify-between items-center gap-3">
             <div className="flex items-center gap-3">
               <Calendar size={24} />
-              <span className="font-semibold text-lg">Gesch√§ftsjahr:</span>
+              <span className="font-semibold text-lg">Geschaeftsjahr:</span>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               {availableYears.map(year => (
@@ -617,7 +617,7 @@ const DeviceTracker = ({ onLogout }) => {
               <button
                 onClick={addNewYear}
                 className="px-3 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center gap-1"
-                title="Neues Jahr hinzuf√ºgen"
+                title="Neues Jahr hinzufuegen"
               >
                 <Plus size={18} />
                 {Math.max(...availableYears) + 1}
@@ -676,7 +676,7 @@ const DeviceTracker = ({ onLogout }) => {
               activeTab === 'roi' ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-orange-50'
             }`}>
             <TrendingUp size={16} />
-            ROI √úbersicht
+            ROI Uebersicht
           </button>
           <button onClick={() => setActiveTab('database')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -697,7 +697,7 @@ const DeviceTracker = ({ onLogout }) => {
               activeTab === 'devices' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-teal-50'
             }`}>
             <Plus size={16} />
-            Ger√§te bearbeiten
+            Geraete bearbeiten
           </button>
         </div>
 
@@ -708,21 +708,21 @@ const DeviceTracker = ({ onLogout }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Jahresumsatz {selectedYear}</div>
-                <div className="text-2xl font-bold text-slate-800">‚Ç¨ {totalRevenue.toFixed(0)}</div>
-                <div className="text-xs text-green-600 font-medium">Provision: ‚Ç¨ {(totalRevenue * 0.1).toFixed(0)}</div>
+                <div className="text-2xl font-bold text-slate-800">EUR  {totalRevenue.toFixed(0)}</div>
+                <div className="text-xs text-green-600 font-medium">Provision: EUR  {(totalRevenue * 0.1).toFixed(0)}</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">{monthNames[currentMonth]} {selectedYear}</div>
-                <div className="text-2xl font-bold text-blue-600">‚Ç¨ {currentMonthRevenue.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-blue-600">EUR  {currentMonthRevenue.toFixed(0)}</div>
                 <div className="text-xs text-slate-500">Aktueller Monat</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Q{currentQuarterNumber} {selectedYear}</div>
-                <div className="text-2xl font-bold text-purple-600">‚Ç¨ {quarterRevenue.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-purple-600">EUR  {quarterRevenue.toFixed(0)}</div>
                 <div className="text-xs text-slate-500">Quartal</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
-                <div className="text-xs text-slate-500 uppercase tracking-wide">Aktive Ger√§te</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide">Aktive Geraete</div>
                 <div className="text-2xl font-bold text-teal-600">{activeDevices}</div>
                 <div className="text-xs text-slate-500">von {devices.length} gesamt</div>
               </div>
@@ -731,8 +731,8 @@ const DeviceTracker = ({ onLogout }) => {
             {/* ROI Summary Card */}
             <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200 mb-4">
               <h3 className="text-sm font-semibold mb-3 text-slate-700 flex items-center gap-2">
-                üìä ROI √úbersicht {selectedYear}
-                <span className="text-xs font-normal text-gray-500">(Ziel: ‚Ç¨1.500 pro Ger√§t)</span>
+                üìä ROI Uebersicht {selectedYear}
+                <span className="text-xs font-normal text-gray-500">(Ziel: EUR 1.500 pro Geraet)</span>
               </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-green-50 rounded-lg">
@@ -779,13 +779,13 @@ const DeviceTracker = ({ onLogout }) => {
                       <div className={`font-bold text-center text-sm ${isCurrentMonth ? 'text-blue-700' : 'text-slate-600'}`}>
                         {monthNames[idx]}
                       </div>
-                      <div className="text-center font-semibold text-slate-800 text-sm">‚Ç¨{mRevenue.toFixed(0)}</div>
+                      <div className="text-center font-semibold text-slate-800 text-sm">EUR {mRevenue.toFixed(0)}</div>
                       {idx > 0 && (
                         <div className={`text-center text-xs ${parseFloat(revChange) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {parseFloat(revChange) >= 0 ? '‚Üë' : '‚Üì'}{Math.abs(revChangePercent)}%
                         </div>
                       )}
-                      <div className="text-center text-slate-600 text-xs mt-1">{activeDevicesMonth} Ger√§te</div>
+                      <div className="text-center text-slate-600 text-xs mt-1">{activeDevicesMonth} Geraete</div>
                     </div>
                   );
                 })}
@@ -799,10 +799,10 @@ const DeviceTracker = ({ onLogout }) => {
           <div className="bg-white rounded-xl shadow-sm p-4 border">
             <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
               <TrendingUp size={20} className="text-orange-600" />
-              ROI √úbersicht {selectedYear}
+              ROI Uebersicht {selectedYear}
             </h2>
             <p className="text-sm text-gray-500 mb-4">
-              Ziel: ‚Ç¨1.500 pro Ger√§t = 100% ROI (abgezahlt). Bei ‚Ç¨3.000 = 200% ROI.
+              Ziel: EUR 1.500 pro Geraet = 100% ROI (abgezahlt). Bei EUR 3.000 = 200% ROI.
             </p>
             
             {/* ROI Summary */}
@@ -821,7 +821,7 @@ const DeviceTracker = ({ onLogout }) => {
               </div>
               <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
                 <div className="text-2xl font-bold text-purple-600">{devices.length}</div>
-                <div className="text-xs text-purple-700">Ger√§te gesamt</div>
+                <div className="text-xs text-purple-700">Geraete gesamt</div>
               </div>
             </div>
 
@@ -846,7 +846,7 @@ const DeviceTracker = ({ onLogout }) => {
 
             {devices.length === 0 && (
               <div className="text-center py-8 text-gray-500">
-                Keine Ger√§te vorhanden. F√ºge Ger√§te hinzu um den ROI zu sehen.
+                Keine Geraete vorhanden. Fuege Geraete hinzu um den ROI zu sehen.
               </div>
             )}
           </div>
@@ -864,7 +864,7 @@ const DeviceTracker = ({ onLogout }) => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                   <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Suche nach Partner, Ger√§tenummer, Mitarbeiter..."
+                    placeholder="Suche nach Partner, Geraetenummer, Mitarbeiter..."
                     className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500" />
                 </div>
               </div>
@@ -872,7 +872,7 @@ const DeviceTracker = ({ onLogout }) => {
                 className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
                 <option value="all">Alle Felder</option>
                 <option value="partner">Nur Partner</option>
-                <option value="device">Nur Ger√§tenummer</option>
+                <option value="device">Nur Geraetenummer</option>
                 <option value="owner">Nur Mitarbeiter</option>
               </select>
             </div>
@@ -880,7 +880,7 @@ const DeviceTracker = ({ onLogout }) => {
               <table className="w-full text-sm">
                 <thead className="bg-purple-100 border-b-2 border-purple-200">
                   <tr>
-                    <th className="p-3 text-left font-semibold">Ger√§tenr.</th>
+                    <th className="p-3 text-left font-semibold">Geraetenr.</th>
                     <th className="p-3 text-left font-semibold">Typ</th>
                     <th className="p-3 text-left font-semibold">Partner</th>
                     <th className="p-3 text-left font-semibold">Owner</th>
@@ -903,7 +903,7 @@ const DeviceTracker = ({ onLogout }) => {
                         <td className="p-3">
                           <ROICircle revenue={yearRev} target={1500} size={60} />
                         </td>
-                        <td className="p-3 font-semibold text-green-600">‚Ç¨ {yearRev.toFixed(2)}</td>
+                        <td className="p-3 font-semibold text-green-600">EUR  {yearRev.toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -941,7 +941,7 @@ const DeviceTracker = ({ onLogout }) => {
                   <thead className="bg-green-100 border-b-2 border-green-200">
                     <tr>
                       <th className="p-3 text-left font-semibold">Mitarbeiter</th>
-                      <th className="p-3 text-center font-semibold">Ger√§te</th>
+                      <th className="p-3 text-center font-semibold">Geraete</th>
                       <th className="p-3 text-center font-semibold">√ò Std</th>
                       <th className="p-3 text-right font-semibold">{monthNames[employeeViewMonth]}</th>
                       <th className="p-3 text-right font-semibold">Q{Math.floor(employeeViewMonth / 3) + 1}</th>
@@ -972,11 +972,11 @@ const DeviceTracker = ({ onLogout }) => {
                           </td>
                           <td className="p-3 text-center">{emp.deviceCount}</td>
                           <td className="p-3 text-center">{emp.avgHours}h</td>
-                          <td className="p-3 text-right">‚Ç¨ {emp.monthRevenue}</td>
-                          <td className="p-3 text-right">‚Ç¨ {emp.quarterRevenue}</td>
-                          <td className="p-3 text-right font-semibold">‚Ç¨ {emp.yearRevenue}</td>
+                          <td className="p-3 text-right">EUR  {emp.monthRevenue}</td>
+                          <td className="p-3 text-right">EUR  {emp.quarterRevenue}</td>
+                          <td className="p-3 text-right font-semibold">EUR  {emp.yearRevenue}</td>
                           <td className="p-3 text-right font-bold text-green-600">
-                            {isFSEGO ? '-' : `‚Ç¨ ${emp.monthlyPayout}`}
+                            {isFSEGO ? '-' : `EUR  ${emp.monthlyPayout}`}
                           </td>
                           <td className="p-3 text-center">
                             {editingEmployee !== idx && (
@@ -995,13 +995,13 @@ const DeviceTracker = ({ onLogout }) => {
                       <td className="p-3">GESAMT</td>
                       <td className="p-3 text-center">{employeeStats.reduce((sum, e) => sum + e.deviceCount, 0)}</td>
                       <td className="p-3 text-center">-</td>
-                      <td className="p-3 text-right">‚Ç¨ {employeeStats.reduce((sum, e) => sum + parseFloat(e.monthRevenue), 0).toFixed(2)}</td>
-                      <td className="p-3 text-right">‚Ç¨ {employeeStats.reduce((sum, e) => sum + parseFloat(e.quarterRevenue), 0).toFixed(2)}</td>
-                      <td className="p-3 text-right">‚Ç¨ {employeeStats.reduce((sum, e) => sum + parseFloat(e.yearRevenue), 0).toFixed(2)}</td>
-                      <td className="p-3 text-right text-emerald-700">‚Ç¨ {employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)}</td>
+                      <td className="p-3 text-right">EUR  {employeeStats.reduce((sum, e) => sum + parseFloat(e.monthRevenue), 0).toFixed(2)}</td>
+                      <td className="p-3 text-right">EUR  {employeeStats.reduce((sum, e) => sum + parseFloat(e.quarterRevenue), 0).toFixed(2)}</td>
+                      <td className="p-3 text-right">EUR  {employeeStats.reduce((sum, e) => sum + parseFloat(e.yearRevenue), 0).toFixed(2)}</td>
+                      <td className="p-3 text-right text-emerald-700">EUR  {employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)}</td>
                       <td className="p-3 text-center">
                         <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
-                          20%: ‚Ç¨ {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)}
+                          20%: EUR  {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)}
                         </span>
                       </td>
                     </tr>
@@ -1022,7 +1022,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`‚Ç¨${value}`, '']} />
+                      <Tooltip formatter={(value) => [`EUR ${value}`, '']} />
                       <Legend />
                       {employees.map((emp, idx) => (
                         <Line key={emp} type="monotone" dataKey={emp} stroke={colors[idx]} strokeWidth={2} dot={{ r: 3 }} />
@@ -1041,7 +1041,7 @@ const DeviceTracker = ({ onLogout }) => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Plus size={20} className="text-teal-600" />
-                Ger√§te bearbeiten ({selectedYear})
+                Geraete bearbeiten ({selectedYear})
               </h2>
               <div className="flex gap-2">
                 <button onClick={() => setShowAddressModal(true)} className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
@@ -1050,7 +1050,7 @@ const DeviceTracker = ({ onLogout }) => {
                 </button>
                 <button onClick={addDevice} className="flex items-center gap-1.5 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm">
                   <Plus size={16} />
-                  Neues Ger√§t
+                  Neues Geraet
                 </button>
               </div>
             </div>
@@ -1096,7 +1096,7 @@ const DeviceTracker = ({ onLogout }) => {
                         <td className="p-1">
                           <select value={device.address || ''} onChange={(e) => updateDevice(device.id, 'address', e.target.value)}
                             className="w-32 px-1 py-1 border rounded text-xs">
-                            <option value="">Adresse w√§hlen...</option>
+                            <option value="">Adresse waehlen...</option>
                             {addresses.map(a => (
                               <option key={a.id} value={getFullAddress(a)}>{a.name} - {a.street}</option>
                             ))}
@@ -1195,7 +1195,7 @@ const DeviceTracker = ({ onLogout }) => {
                 ))}
               </div>
               <button onClick={() => setShowReportModal(false)} className="w-full py-2 bg-gray-200 rounded-lg">
-                Schlie√üen
+                Schliessen
               </button>
             </div>
           </div>
@@ -1212,7 +1212,7 @@ const DeviceTracker = ({ onLogout }) => {
                     Drucken / PDF
                   </button>
                   <button onClick={() => setShowReport(false)} className="px-4 py-2 bg-gray-200 rounded-lg">
-                    Schlie√üen
+                    Schliessen
                   </button>
                 </div>
               </div>
@@ -1222,25 +1222,25 @@ const DeviceTracker = ({ onLogout }) => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Gesamtumsatz</div>
-                    <div className="text-2xl font-bold">‚Ç¨ {reportData.monthRevenue.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">EUR  {reportData.monthRevenue.toFixed(2)}</div>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Provision (10%)</div>
-                    <div className="text-2xl font-bold">‚Ç¨ {reportData.provision.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">EUR  {reportData.provision.toFixed(2)}</div>
                   </div>
                 </div>
                 <div className="mb-4">
-                  <strong>Aktive Ger√§te:</strong> {reportData.activeDevices.length}
+                  <strong>Aktive Geraete:</strong> {reportData.activeDevices.length}
                 </div>
                 <div className="mb-4">
-                  <strong>Neue Ger√§te:</strong> {reportData.newDevicesArr.length}
+                  <strong>Neue Geraete:</strong> {reportData.newDevicesArr.length}
                 </div>
                 {reportData.top3Devices.length > 0 && (
                   <div className="mb-4">
-                    <strong>Top 3 Ger√§te:</strong>
+                    <strong>Top 3 Geraete:</strong>
                     <ul className="list-disc list-inside mt-2">
                       {reportData.top3Devices.map((d, i) => (
-                        <li key={i}>{d.deviceNumber} - ‚Ç¨ {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)}</li>
+                        <li key={i}>{d.deviceNumber} - EUR  {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)}</li>
                       ))}
                     </ul>
                   </div>
@@ -1267,7 +1267,7 @@ const DeviceTracker = ({ onLogout }) => {
                   <input type="text" placeholder="Name" value={newAddress.name}
                     onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
                     className="px-3 py-2 border rounded-lg text-sm" />
-                  <input type="text" placeholder="Stra√üe" value={newAddress.street}
+                  <input type="text" placeholder="Strasse" value={newAddress.street}
                     onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
                     className="px-3 py-2 border rounded-lg text-sm" />
                   <input type="text" placeholder="PLZ" value={newAddress.zip}
@@ -1278,7 +1278,7 @@ const DeviceTracker = ({ onLogout }) => {
                     className="px-3 py-2 border rounded-lg text-sm" />
                 </div>
                 <button onClick={addAddress} className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm">
-                  Hinzuf√ºgen
+                  Hinzufuegen
                 </button>
               </div>
               <div className="p-4">
@@ -1291,7 +1291,7 @@ const DeviceTracker = ({ onLogout }) => {
                         <div>
                           <div className="font-medium">{addr.name}</div>
                           <div className="text-sm text-gray-600">{getFullAddress(addr)}</div>
-                          <div className="text-xs text-gray-400">{deviceCount} Ger√§t(e)</div>
+                          <div className="text-xs text-gray-400">{deviceCount} Geraet(e)</div>
                         </div>
                         <button onClick={() => deleteAddress(addr.id)} disabled={deviceCount > 0}
                           className={`p-2 rounded ${deviceCount > 0 ? 'text-gray-300' : 'text-red-500 hover:bg-red-100'}`}>
@@ -1313,7 +1313,7 @@ const DeviceTracker = ({ onLogout }) => {
               <div className="p-4 border-b flex justify-between items-center bg-gray-100">
                 <h2 className="text-lg font-bold flex items-center gap-2">
                   <Trash2 size={20} className="text-gray-600" />
-                  Papierkorb ({deletedDevices.length} Ger√§te)
+                  Papierkorb ({deletedDevices.length} Geraete)
                 </h2>
                 <div className="flex items-center gap-2">
                   {deletedDevices.length > 0 && (
@@ -1330,7 +1330,7 @@ const DeviceTracker = ({ onLogout }) => {
                 <div className="p-12 text-center text-gray-500">
                   <Trash2 size={48} className="mx-auto mb-4 opacity-30" />
                   <p className="text-lg font-medium">Papierkorb ist leer</p>
-                  <p className="text-sm">Gel√∂schte Ger√§te werden hier angezeigt</p>
+                  <p className="text-sm">Geloeschte Geraete werden hier angezeigt</p>
                 </div>
               ) : (
                 <div className="p-4">
@@ -1366,13 +1366,13 @@ const DeviceTracker = ({ onLogout }) => {
                             </div>
                             <div className="mt-2 flex items-center gap-4 text-xs">
                               <span className="text-gray-500">
-                                üóëÔ∏è Gel√∂scht: {formattedDate}
+                                üóëÔ∏è Geloescht: {formattedDate}
                               </span>
                               <span className="text-gray-500">
                                 üë§ Owner: {device.owner || '-'}
                               </span>
                               <span className="text-green-600 font-medium">
-                                üí∞ Umsatz {selectedYear}: ‚Ç¨{yearRevenue.toFixed(0)}
+                                üí∞ Umsatz {selectedYear}: EUR {yearRevenue.toFixed(0)}
                               </span>
                             </div>
                           </div>
@@ -1389,7 +1389,7 @@ const DeviceTracker = ({ onLogout }) => {
                               className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-all"
                             >
                               <Trash2 size={14} />
-                              Endg√ºltig l√∂schen
+                              Endgueltig loeschen
                             </button>
                           </div>
                         </div>
@@ -1408,5 +1408,3 @@ const DeviceTracker = ({ onLogout }) => {
 };
 
 export default DeviceTracker;
-
-
