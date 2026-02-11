@@ -1,56 +1,86 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { getCookie, deleteCookie } from 'cookies-next'
-import dynamic from 'next/dynamic'
+import { setCookie, getCookie } from 'cookies-next'
 
-const VooZaaTracker = dynamic(() => import('../components/VooZaaTracker'), {
-  ssr: false,
-  loading: () => (
-    <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8'}}>
-      <div style={{textAlign: 'center'}}>
-        <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🎰</div>
-        <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#2563eb'}}>VooZaa Tracking</div>
-        <div style={{color: '#6b7280', marginTop: '0.5rem'}}>Lädt...</div>
-      </div>
-    </div>
-  )
-})
-
-export default function Home() {
+export default function Login() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
+  // Check if already authenticated
   useEffect(() => {
     const auth = getCookie('voozaa_auth')
     if (auth === 'authenticated') {
-      setIsAuthenticated(true)
+      window.location.href = '/'
     } else {
-      router.push('/login')
+      setIsLoading(false)
     }
-    setIsLoading(false)
-  }, [router])
+  }, [])
 
-  const handleLogout = () => {
-    deleteCookie('voozaa_auth')
-    router.push('/login')
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    // Password check - change 'voozaa2024' to your password
+    if (password === 'voozaa2024') {
+      setCookie('voozaa_auth', 'authenticated', { maxAge: 60 * 60 * 24 * 30 }) // 30 days
+      window.location.href = '/'
+    } else {
+      setError('Falsches Passwort!')
+      setPassword('')
+    }
   }
 
   if (isLoading) {
     return (
-      <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8'}}>
-        <div style={{textAlign: 'center'}}>
-          <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🎰</div>
-          <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#2563eb'}}>VooZaa Tracking</div>
-          <div style={{color: '#6b7280', marginTop: '0.5rem'}}>Prüfe Anmeldung...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🎰</div>
+          <div className="text-xl font-semibold text-blue-600">VooZaa Tracking</div>
+          <div className="text-gray-500 mt-2">Lädt...</div>
         </div>
       </div>
     )
   }
 
-  if (!isAuthenticated) {
-    return null
-  }
-
-  return <VooZaaTracker onLogout={handleLogout} />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-4">🎰</div>
+          <h1 className="text-2xl font-bold text-gray-800">VooZaa Tracking</h1>
+          <p className="text-gray-500 mt-2">Bitte melde dich an</p>
+        </div>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Passwort
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              placeholder="Passwort eingeben..."
+              autoFocus
+            />
+          </div>
+          
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+          
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all"
+          >
+            Anmelden
+          </button>
+        </form>
+      </div>
+    </div>
+  )
 }
