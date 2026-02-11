@@ -1,7 +1,52 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Download, Search, Database, Users, BarChart3, TrendingUp, FileText, MapPin, LogOut, Calendar, RotateCcw } from 'lucide-react';
+import { Plus, Trash2, Download, Search, Database, Users, BarChart3, TrendingUp, FileText, MapPin, LogOut, Calendar, RotateCcw, Filter } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { storage } from '../lib/supabase';
+
+// Traffic Light Component for monthly revenue
+const TrafficLight = ({ revenue }) => {
+  let color, label, bgColor, textColor;
+  
+  if (revenue >= 120) {
+    color = '#22c55e'; // bright green
+    bgColor = 'bg-green-100';
+    textColor = 'text-green-700';
+    label = 'Super';
+  } else if (revenue >= 95) {
+    color = '#4ade80'; // green
+    bgColor = 'bg-green-50';
+    textColor = 'text-green-600';
+    label = 'Gut';
+  } else if (revenue >= 60) {
+    color = '#fbbf24'; // yellow/orange
+    bgColor = 'bg-yellow-50';
+    textColor = 'text-yellow-700';
+    label = 'OK';
+  } else if (revenue >= 30) {
+    color = '#f87171'; // light red
+    bgColor = 'bg-red-50';
+    textColor = 'text-red-500';
+    label = 'Schwach';
+  } else {
+    color = '#dc2626'; // dark red
+    bgColor = 'bg-red-100';
+    textColor = 'text-red-700';
+    label = 'Kritisch';
+  }
+  
+  return (
+    <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${bgColor}`}>
+      <div 
+        className="w-4 h-4 rounded-full shadow-inner"
+        style={{ 
+          backgroundColor: color,
+          boxShadow: revenue >= 120 ? `0 0 8px ${color}, 0 0 12px ${color}` : 'none'
+        }}
+      />
+      <span className={`text-xs font-medium ${textColor}`}>{label}</span>
+    </div>
+  );
+};
 
 // ROI Circle Component
 const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
@@ -10,22 +55,19 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
   const isComplete = revenue >= target;
   const isOverTarget = revenue > target;
   
-  // Calculate circle properties
   const radius = (size - 10) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (Math.min(percentage, 100) / 100) * circumference;
   const overTargetOffset = isOverTarget ? circumference - ((percentage - 100) / 100) * circumference : circumference;
   
-  // Colors
-  const baseColor = '#e5e7eb'; // gray-200
-  const progressColor = isComplete ? '#22c55e' : '#ef4444'; // green-500 or red-500
-  const overTargetColor = '#15803d'; // green-700 (darker green for over target)
+  const baseColor = '#e5e7eb';
+  const progressColor = isComplete ? '#22c55e' : '#ef4444';
+  const overTargetColor = '#15803d';
   
   return (
     <div className="flex flex-col items-center">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="transform -rotate-90">
-          {/* Background circle */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -34,7 +76,6 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
             stroke={baseColor}
             strokeWidth="6"
           />
-          {/* Progress circle (up to 100%) */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -47,7 +88,6 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
             strokeDashoffset={strokeDashoffset}
             className="transition-all duration-500"
           />
-          {/* Over-target circle (100% - 200%) */}
           {isOverTarget && (
             <circle
               cx={size / 2}
@@ -63,7 +103,6 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
             />
           )}
         </svg>
-        {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className={`text-xs font-bold ${isComplete ? 'text-green-600' : 'text-red-500'}`}>
             {roi}%
@@ -73,9 +112,9 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
       </div>
       <div className="text-[10px] text-center mt-1">
         <span className={isComplete ? 'text-green-600 font-semibold' : 'text-gray-500'}>
-          EUR {revenue.toFixed(0)}
+          {revenue.toFixed(0)} ‚Ç¨
         </span>
-        <span className="text-gray-400"> / EUR {target}</span>
+        <span className="text-gray-400"> / {target} ‚Ç¨</span>
       </div>
     </div>
   );
@@ -83,7 +122,7 @@ const ROICircle = ({ revenue, target = 1500, size = 80 }) => {
 
 const DeviceTracker = ({ onLogout }) => {
   const [devices, setDevices] = useState([]);
-  const [deletedDevices, setDeletedDevices] = useState([]); // Papierkorb
+  const [deletedDevices, setDeletedDevices] = useState([]);
   const [showTrashModal, setShowTrashModal] = useState(false);
   const [employees, setEmployees] = useState([
     'FSEGO', 'Mitarbeiter 2', 'Mitarbeiter 3', 'Mitarbeiter 4', 'Mitarbeiter 5',
@@ -106,6 +145,7 @@ const DeviceTracker = ({ onLogout }) => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importText, setImportText] = useState('');
   const [newAddress, setNewAddress] = useState({ name: '', street: '', zip: '', city: 'Lueneburg' });
+  const [trafficLightFilter, setTrafficLightFilter] = useState('all');
 
   const deviceTypes = ['12 slot', '24 slot', '28 slot'];
   const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -116,7 +156,6 @@ const DeviceTracker = ({ onLogout }) => {
   const currentMonth = today.getMonth();
   const realCurrentYear = today.getFullYear();
   
-  // Year selection state
   const [selectedYear, setSelectedYear] = useState(realCurrentYear);
   const [availableYears, setAvailableYears] = useState([2026, 2027, 2028, 2029, 2030]);
   
@@ -124,7 +163,6 @@ const DeviceTracker = ({ onLogout }) => {
   const [importMonth, setImportMonth] = useState(currentMonth);
   const [employeeViewMonth, setEmployeeViewMonth] = useState(currentMonth);
 
-  // Helper to get device revenue for a specific month and year
   const getDeviceRevenue = (device, month, year = selectedYear) => {
     if (device.revenue && device.revenue[year] && device.revenue[year][month] !== undefined) {
       return parseFloat(device.revenue[year][month]) || 0;
@@ -135,12 +173,22 @@ const DeviceTracker = ({ onLogout }) => {
     return 0;
   };
 
-  // Get total revenue for a device in selected year
   const getDeviceYearRevenue = (device, year = selectedYear) => {
     return months.reduce((sum, m) => sum + getDeviceRevenue(device, m, year), 0);
   };
 
-  // Helper to set device revenue
+  const getDeviceCurrentMonthRevenue = (device) => {
+    return getDeviceRevenue(device, months[currentMonth], selectedYear);
+  };
+
+  const getTrafficLightCategory = (revenue) => {
+    if (revenue >= 120) return 'super';
+    if (revenue >= 95) return 'gut';
+    if (revenue >= 60) return 'ok';
+    if (revenue >= 30) return 'schwach';
+    return 'kritisch';
+  };
+
   const setDeviceRevenue = (device, month, value, year = selectedYear) => {
     const newDevice = { ...device };
     if (!newDevice.revenue) {
@@ -153,7 +201,6 @@ const DeviceTracker = ({ onLogout }) => {
     return newDevice;
   };
 
-  // Migrate old format to new format
   const migrateDeviceData = (device) => {
     if (device.revenue) return device;
     
@@ -198,22 +245,22 @@ const DeviceTracker = ({ onLogout }) => {
             {
               id: 1, deviceNumber: 'DEV001', deviceType: '12 slot', address: 'Musterstrasse 1, 21335 Lueneburg',
               partnerName: 'Partner A', owner: 'FSEGO', hours: 5,
-              revenue: { 2026: { jan: 1000, feb: 1500, mar: 1200, apr: 1800, may: 1600, jun: 2000, jul: 1900, aug: 2100, sep: 1700, oct: 1800, nov: 2200, dec: 2400 } }
+              revenue: { 2026: { jan: 100, feb: 150, mar: 120, apr: 180, may: 160, jun: 200, jul: 190, aug: 210, sep: 170, oct: 180, nov: 220, dec: 240 } }
             },
             {
               id: 2, deviceNumber: 'DEV002', deviceType: '24 slot', address: 'Beispielweg 5, 21335 Lueneburg',
               partnerName: 'Partner B', owner: 'Mitarbeiter 2', hours: 7,
-              revenue: { 2026: { jan: 800, feb: 1200, mar: 1000, apr: 1400, may: 1300, jun: 1600, jul: 1500, aug: 1700, sep: 1400, oct: 1500, nov: 1800, dec: 2000 } }
+              revenue: { 2026: { jan: 80, feb: 45, mar: 100, apr: 55, may: 130, jun: 25, jul: 150, aug: 170, sep: 140, oct: 150, nov: 180, dec: 200 } }
             },
             {
               id: 3, deviceNumber: 'DEV003', deviceType: '28 slot', address: 'Hauptstrasse 10, 21337 Lueneburg',
               partnerName: 'Partner A', owner: 'FSEGO', hours: 8,
-              revenue: { 2026: { jan: 1200, feb: 1800, mar: 1500, apr: 2000, may: 1900, jun: 2200, jul: 2100, aug: 2400, sep: 2000, oct: 2100, nov: 2500, dec: 2800 } }
+              revenue: { 2026: { jan: 120, feb: 180, mar: 150, apr: 200, may: 190, jun: 220, jul: 210, aug: 240, sep: 200, oct: 210, nov: 250, dec: 280 } }
             },
             {
               id: 4, deviceNumber: 'DEV004', deviceType: '12 slot', address: 'Bahnhofstrasse 3, 21339 Lueneburg',
               partnerName: 'Partner C', owner: 'Mitarbeiter 3', hours: 4,
-              revenue: { 2026: { jan: 600, feb: 900, mar: 750, apr: 1100, may: 950, jun: 1200, jul: 1100, aug: 1300, sep: 1050, oct: 1150, nov: 1400, dec: 1600 } }
+              revenue: { 2026: { jan: 20, feb: 35, mar: 28, apr: 42, may: 38, jun: 48, jul: 44, aug: 52, sep: 42, oct: 46, nov: 56, dec: 64 } }
             }
           ]);
         }
@@ -252,7 +299,7 @@ const DeviceTracker = ({ onLogout }) => {
           await storage.set('employees', JSON.stringify(employees));
           await storage.set('addresses', JSON.stringify(addresses));
           await storage.set('availableYears', JSON.stringify(availableYears));
-          setSaveStatus('‚úì Gespeichert');
+          setSaveStatus('Gespeichert');
           setTimeout(() => setSaveStatus(''), 2000);
         } catch (error) {
           console.error('Speicherfehler:', error);
@@ -273,43 +320,38 @@ const DeviceTracker = ({ onLogout }) => {
   const deleteDevice = (id) => {
     const deviceToDelete = devices.find(d => d.id === id);
     if (deviceToDelete) {
-      // Add deletion timestamp
       const deletedDevice = {
         ...deviceToDelete,
         deletedAt: new Date().toISOString()
       };
       setDeletedDevices([deletedDevice, ...deletedDevices]);
       setDevices(devices.filter(d => d.id !== id));
-      setSaveStatus('üóëÔ∏è Geraet in Papierkorb verschoben');
+      setSaveStatus('Geraet in Papierkorb verschoben');
       setTimeout(() => setSaveStatus(''), 2000);
     }
   };
 
-  // Restore device from trash
   const restoreDevice = (id) => {
     const deviceToRestore = deletedDevices.find(d => d.id === id);
     if (deviceToRestore) {
-      // Remove deletedAt timestamp
       const { deletedAt, ...restoredDevice } = deviceToRestore;
       setDevices([...devices, restoredDevice]);
       setDeletedDevices(deletedDevices.filter(d => d.id !== id));
-      setSaveStatus('‚úì Geraet wiederhergestellt');
+      setSaveStatus('Geraet wiederhergestellt');
       setTimeout(() => setSaveStatus(''), 2000);
     }
   };
 
-  // Permanently delete device from trash
   const permanentlyDeleteDevice = (id) => {
     setDeletedDevices(deletedDevices.filter(d => d.id !== id));
-    setSaveStatus('‚úì Geraet endgueltig geloescht');
+    setSaveStatus('Geraet endgueltig geloescht');
     setTimeout(() => setSaveStatus(''), 2000);
   };
 
-  // Empty entire trash
   const emptyTrash = () => {
     if (deletedDevices.length > 0 && confirm('Papierkorb wirklich leeren? Dies kann nicht rueckgaengig gemacht werden!')) {
       setDeletedDevices([]);
-      setSaveStatus('‚úì Papierkorb geleert');
+      setSaveStatus('Papierkorb geleert');
       setTimeout(() => setSaveStatus(''), 2000);
     }
   };
@@ -380,7 +422,7 @@ const DeviceTracker = ({ onLogout }) => {
       setDevices(updatedDevices);
       setImportText('');
       setShowImportModal(false);
-      setSaveStatus(`‚úì ${importCount} Eintraege importiert fuer ${selectedYear}`);
+      setSaveStatus(`${importCount} Eintraege importiert fuer ${selectedYear}`);
       setTimeout(() => setSaveStatus(''), 3000);
     }
   };
@@ -449,6 +491,7 @@ const DeviceTracker = ({ onLogout }) => {
     });
   }, [devices, employees, employeeViewMonth, selectedYear]);
 
+  // Chart data for monthly revenue per employee
   const chartData = useMemo(() => {
     const result = [];
     for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
@@ -474,28 +517,85 @@ const DeviceTracker = ({ onLogout }) => {
     return result;
   }, [devices, employees, selectedYear]);
 
+  // Cumulative chart data for year revenue per employee
+  const cumulativeChartData = useMemo(() => {
+    const result = [];
+    const cumulative = {};
+    
+    employees.forEach(emp => {
+      cumulative[emp] = 0;
+    });
+    
+    for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+      const monthKey = months[monthIndex];
+      const dataPoint = { month: monthNames[monthIndex] };
+      
+      for (let empIndex = 0; empIndex < 10; empIndex++) {
+        const empName = employees[empIndex];
+        let monatsSumme = 0;
+        
+        for (let devIndex = 0; devIndex < devices.length; devIndex++) {
+          const device = devices[devIndex];
+          if (device.owner === empName) {
+            monatsSumme += getDeviceRevenue(device, monthKey, selectedYear);
+          }
+        }
+        
+        cumulative[empName] += monatsSumme;
+        dataPoint[empName] = cumulative[empName];
+      }
+      
+      result.push(dataPoint);
+    }
+    return result;
+  }, [devices, employees, selectedYear]);
+
   const hasChartData = useMemo(() => {
     return devices.some(d => months.some(m => getDeviceRevenue(d, m, selectedYear) > 0));
   }, [devices, selectedYear]);
 
   const filteredDevices = useMemo(() => {
-    if (!searchQuery.trim()) return devices;
-    const query = searchQuery.toLowerCase().trim();
-    return devices.filter(d => {
-      if (searchType === 'all') {
-        return (
-          (d.partnerName && d.partnerName.toLowerCase().includes(query)) ||
-          (d.deviceNumber && d.deviceNumber.toLowerCase().includes(query)) ||
-          (d.owner && d.owner.toLowerCase().includes(query)) ||
-          (d.address && d.address.toLowerCase().includes(query))
-        );
-      }
-      if (searchType === 'partner') return d.partnerName && d.partnerName.toLowerCase().includes(query);
-      if (searchType === 'device') return d.deviceNumber && d.deviceNumber.toLowerCase().includes(query);
-      if (searchType === 'owner') return d.owner && d.owner.toLowerCase().includes(query);
-      return true;
+    let filtered = devices;
+    
+    // Text search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(d => {
+        if (searchType === 'all') {
+          return (
+            (d.partnerName && d.partnerName.toLowerCase().includes(query)) ||
+            (d.deviceNumber && d.deviceNumber.toLowerCase().includes(query)) ||
+            (d.owner && d.owner.toLowerCase().includes(query)) ||
+            (d.address && d.address.toLowerCase().includes(query))
+          );
+        }
+        if (searchType === 'partner') return d.partnerName && d.partnerName.toLowerCase().includes(query);
+        if (searchType === 'device') return d.deviceNumber && d.deviceNumber.toLowerCase().includes(query);
+        if (searchType === 'owner') return d.owner && d.owner.toLowerCase().includes(query);
+        return true;
+      });
+    }
+    
+    // Traffic light filter
+    if (trafficLightFilter !== 'all') {
+      filtered = filtered.filter(d => {
+        const monthRevenue = getDeviceCurrentMonthRevenue(d);
+        const category = getTrafficLightCategory(monthRevenue);
+        return category === trafficLightFilter;
+      });
+    }
+    
+    return filtered;
+  }, [devices, searchQuery, searchType, trafficLightFilter, selectedYear]);
+
+  // Sort devices by traffic light status for database view
+  const sortedFilteredDevices = useMemo(() => {
+    return [...filteredDevices].sort((a, b) => {
+      const aRev = getDeviceCurrentMonthRevenue(a);
+      const bRev = getDeviceCurrentMonthRevenue(b);
+      return bRev - aRev; // Best to worst
     });
-  }, [devices, searchQuery, searchType]);
+  }, [filteredDevices]);
 
   const exportData = () => {
     const data = JSON.stringify({ devices, employees, addresses, availableYears, exportDate: new Date().toISOString(), selectedYear }, null, 2);
@@ -571,7 +671,6 @@ const DeviceTracker = ({ onLogout }) => {
     setShowReportModal(false);
   };
 
-  // Calculate ROI stats
   const roiStats = useMemo(() => {
     const TARGET = 1500;
     const devicesWithROI = devices.map(d => {
@@ -587,6 +686,17 @@ const DeviceTracker = ({ onLogout }) => {
       : 0;
     
     return { paidOff, notPaidOff, avgROI, devicesWithROI };
+  }, [devices, selectedYear]);
+
+  // Traffic light stats
+  const trafficLightStats = useMemo(() => {
+    const stats = { super: 0, gut: 0, ok: 0, schwach: 0, kritisch: 0 };
+    devices.forEach(d => {
+      const monthRevenue = getDeviceCurrentMonthRevenue(d);
+      const category = getTrafficLightCategory(monthRevenue);
+      stats[category]++;
+    });
+    return stats;
   }, [devices, selectedYear]);
 
   return (
@@ -629,7 +739,7 @@ const DeviceTracker = ({ onLogout }) => {
         {/* Main Header */}
         <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            üé∞ VooZaa Tracking {selectedYear}
+            VooZaa Tracking {selectedYear}
           </h1>
           <div className="flex items-center gap-2 flex-wrap">
             {saveStatus && <span className="text-sm text-green-600 font-medium">{saveStatus}</span>}
@@ -708,17 +818,17 @@ const DeviceTracker = ({ onLogout }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Jahresumsatz {selectedYear}</div>
-                <div className="text-2xl font-bold text-slate-800">EUR  {totalRevenue.toFixed(0)}</div>
-                <div className="text-xs text-green-600 font-medium">Provision: EUR  {(totalRevenue * 0.1).toFixed(0)}</div>
+                <div className="text-2xl font-bold text-slate-800">{totalRevenue.toFixed(0)} ‚Ç¨</div>
+                <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenue * 0.1).toFixed(0)} ‚Ç¨</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">{monthNames[currentMonth]} {selectedYear}</div>
-                <div className="text-2xl font-bold text-blue-600">EUR  {currentMonthRevenue.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-blue-600">{currentMonthRevenue.toFixed(0)} ‚Ç¨</div>
                 <div className="text-xs text-slate-500">Aktueller Monat</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Q{currentQuarterNumber} {selectedYear}</div>
-                <div className="text-2xl font-bold text-purple-600">EUR  {quarterRevenue.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-purple-600">{quarterRevenue.toFixed(0)} ‚Ç¨</div>
                 <div className="text-xs text-slate-500">Quartal</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
@@ -731,13 +841,13 @@ const DeviceTracker = ({ onLogout }) => {
             {/* ROI Summary Card */}
             <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200 mb-4">
               <h3 className="text-sm font-semibold mb-3 text-slate-700 flex items-center gap-2">
-                üìä ROI Uebersicht {selectedYear}
-                <span className="text-xs font-normal text-gray-500">(Ziel: EUR 1.500 pro Geraet)</span>
+                ROI Uebersicht {selectedYear}
+                <span className="text-xs font-normal text-gray-500">(Ziel: 1.500 ‚Ç¨ pro Geraet)</span>
               </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">{roiStats.paidOff}</div>
-                  <div className="text-xs text-green-700">Abgezahlt ‚úì</div>
+                  <div className="text-xs text-green-700">Abgezahlt</div>
                 </div>
                 <div className="text-center p-3 bg-red-50 rounded-lg">
                   <div className="text-2xl font-bold text-red-500">{roiStats.notPaidOff}</div>
@@ -745,14 +855,46 @@ const DeviceTracker = ({ onLogout }) => {
                 </div>
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{roiStats.avgROI.toFixed(0)}%</div>
-                  <div className="text-xs text-blue-700">√ò ROI</div>
+                  <div className="text-xs text-blue-700">Durchschnitt ROI</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Traffic Light Summary */}
+            <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200 mb-4">
+              <h3 className="text-sm font-semibold mb-3 text-slate-700">Ampel-Status {monthNames[currentMonth]} {selectedYear}</h3>
+              <div className="grid grid-cols-5 gap-2">
+                <div className="text-center p-2 bg-green-100 rounded-lg border border-green-300">
+                  <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e' }}></div>
+                  <div className="text-lg font-bold text-green-700">{trafficLightStats.super}</div>
+                  <div className="text-xs text-green-600">Super (120+)</div>
+                </div>
+                <div className="text-center p-2 bg-green-50 rounded-lg border border-green-200">
+                  <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#4ade80' }}></div>
+                  <div className="text-lg font-bold text-green-600">{trafficLightStats.gut}</div>
+                  <div className="text-xs text-green-500">Gut (95-120)</div>
+                </div>
+                <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#fbbf24' }}></div>
+                  <div className="text-lg font-bold text-yellow-700">{trafficLightStats.ok}</div>
+                  <div className="text-xs text-yellow-600">OK (60-95)</div>
+                </div>
+                <div className="text-center p-2 bg-red-50 rounded-lg border border-red-200">
+                  <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#f87171' }}></div>
+                  <div className="text-lg font-bold text-red-500">{trafficLightStats.schwach}</div>
+                  <div className="text-xs text-red-400">Schwach (30-60)</div>
+                </div>
+                <div className="text-center p-2 bg-red-100 rounded-lg border border-red-300">
+                  <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#dc2626' }}></div>
+                  <div className="text-lg font-bold text-red-700">{trafficLightStats.kritisch}</div>
+                  <div className="text-xs text-red-600">Kritisch (0-30)</div>
                 </div>
               </div>
             </div>
 
             {/* Monatshistorie */}
             <div className="bg-white rounded-xl shadow-sm p-3 border border-slate-200">
-              <h3 className="text-sm font-semibold mb-2 text-slate-700">üìÖ Monatshistorie {selectedYear}</h3>
+              <h3 className="text-sm font-semibold mb-2 text-slate-700">Monatshistorie {selectedYear}</h3>
               <div className="grid grid-cols-6 gap-1.5">
                 {months.map((m, idx) => {
                   const mRevenue = devices.reduce((sum, d) => sum + getDeviceRevenue(d, m, selectedYear), 0);
@@ -779,10 +921,10 @@ const DeviceTracker = ({ onLogout }) => {
                       <div className={`font-bold text-center text-sm ${isCurrentMonth ? 'text-blue-700' : 'text-slate-600'}`}>
                         {monthNames[idx]}
                       </div>
-                      <div className="text-center font-semibold text-slate-800 text-sm">EUR {mRevenue.toFixed(0)}</div>
+                      <div className="text-center font-semibold text-slate-800 text-sm">{mRevenue.toFixed(0)} ‚Ç¨</div>
                       {idx > 0 && (
                         <div className={`text-center text-xs ${parseFloat(revChange) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {parseFloat(revChange) >= 0 ? '‚Üë' : '‚Üì'}{Math.abs(revChangePercent)}%
+                          {parseFloat(revChange) >= 0 ? '+' : ''}{revChangePercent}%
                         </div>
                       )}
                       <div className="text-center text-slate-600 text-xs mt-1">{activeDevicesMonth} Geraete</div>
@@ -802,14 +944,14 @@ const DeviceTracker = ({ onLogout }) => {
               ROI Uebersicht {selectedYear}
             </h2>
             <p className="text-sm text-gray-500 mb-4">
-              Ziel: EUR 1.500 pro Geraet = 100% ROI (abgezahlt). Bei EUR 3.000 = 200% ROI.
+              Ziel: 1.500 ‚Ç¨ pro Geraet = 100% ROI (abgezahlt). Bei 3.000 ‚Ç¨ = 200% ROI.
             </p>
             
             {/* ROI Summary */}
             <div className="grid grid-cols-4 gap-3 mb-6">
               <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
                 <div className="text-2xl font-bold text-green-600">{roiStats.paidOff}</div>
-                <div className="text-xs text-green-700">Abgezahlt (‚â•100%)</div>
+                <div className="text-xs text-green-700">Abgezahlt (100%+)</div>
               </div>
               <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
                 <div className="text-2xl font-bold text-red-500">{roiStats.notPaidOff}</div>
@@ -875,6 +1017,15 @@ const DeviceTracker = ({ onLogout }) => {
                 <option value="device">Nur Geraetenummer</option>
                 <option value="owner">Nur Mitarbeiter</option>
               </select>
+              <select value={trafficLightFilter} onChange={(e) => setTrafficLightFilter(e.target.value)}
+                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                <option value="all">Alle Status</option>
+                <option value="super">Super (120+ ‚Ç¨)</option>
+                <option value="gut">Gut (95-120 ‚Ç¨)</option>
+                <option value="ok">OK (60-95 ‚Ç¨)</option>
+                <option value="schwach">Schwach (30-60 ‚Ç¨)</option>
+                <option value="kritisch">Kritisch (0-30 ‚Ç¨)</option>
+              </select>
             </div>
             <div className="overflow-x-auto border rounded-lg">
               <table className="w-full text-sm">
@@ -884,26 +1035,30 @@ const DeviceTracker = ({ onLogout }) => {
                     <th className="p-3 text-left font-semibold">Typ</th>
                     <th className="p-3 text-left font-semibold">Partner</th>
                     <th className="p-3 text-left font-semibold">Owner</th>
-                    <th className="p-3 text-left font-semibold">Adresse</th>
+                    <th className="p-3 text-center font-semibold">{monthNames[currentMonth]} ‚Ç¨</th>
+                    <th className="p-3 text-center font-semibold">Status</th>
                     <th className="p-3 text-center font-semibold">ROI</th>
                     <th className="p-3 text-left font-semibold">Jahresumsatz</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredDevices.map((device, idx) => {
+                  {sortedFilteredDevices.map((device, idx) => {
                     const yearRev = getDeviceYearRevenue(device, selectedYear);
-                    const roi = (yearRev / 1500) * 100;
+                    const monthRev = getDeviceCurrentMonthRevenue(device);
                     return (
                       <tr key={device.id} className={idx % 2 === 0 ? 'bg-white hover:bg-purple-50' : 'bg-gray-50 hover:bg-purple-50'}>
                         <td className="p-3 font-medium text-purple-700">{device.deviceNumber || '-'}</td>
                         <td className="p-3">{device.deviceType || '-'}</td>
                         <td className="p-3 font-medium">{device.partnerName || '-'}</td>
                         <td className="p-3">{device.owner || '-'}</td>
-                        <td className="p-3 text-xs">{device.address || '-'}</td>
+                        <td className="p-3 text-center font-semibold">{monthRev.toFixed(0)} ‚Ç¨</td>
+                        <td className="p-3">
+                          <TrafficLight revenue={monthRev} />
+                        </td>
                         <td className="p-3">
                           <ROICircle revenue={yearRev} target={1500} size={60} />
                         </td>
-                        <td className="p-3 font-semibold text-green-600">EUR  {yearRev.toFixed(2)}</td>
+                        <td className="p-3 font-semibold text-green-600">{yearRev.toFixed(2)} ‚Ç¨</td>
                       </tr>
                     );
                   })}
@@ -942,7 +1097,7 @@ const DeviceTracker = ({ onLogout }) => {
                     <tr>
                       <th className="p-3 text-left font-semibold">Mitarbeiter</th>
                       <th className="p-3 text-center font-semibold">Geraete</th>
-                      <th className="p-3 text-center font-semibold">√ò Std</th>
+                      <th className="p-3 text-center font-semibold">Std</th>
                       <th className="p-3 text-right font-semibold">{monthNames[employeeViewMonth]}</th>
                       <th className="p-3 text-right font-semibold">Q{Math.floor(employeeViewMonth / 3) + 1}</th>
                       <th className="p-3 text-right font-semibold">Jahr</th>
@@ -960,8 +1115,8 @@ const DeviceTracker = ({ onLogout }) => {
                               <div className="flex gap-2">
                                 <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
                                   className="px-2 py-1 border rounded w-32" autoFocus />
-                                <button onClick={saveEmployeeName} className="px-2 py-1 bg-green-500 text-white rounded text-xs">‚úì</button>
-                                <button onClick={cancelEdit} className="px-2 py-1 bg-gray-300 rounded text-xs">‚úï</button>
+                                <button onClick={saveEmployeeName} className="px-2 py-1 bg-green-500 text-white rounded text-xs">OK</button>
+                                <button onClick={cancelEdit} className="px-2 py-1 bg-gray-300 rounded text-xs">X</button>
                               </div>
                             ) : (
                               <span className="font-medium" style={{ color: colors[idx] }}>
@@ -972,11 +1127,11 @@ const DeviceTracker = ({ onLogout }) => {
                           </td>
                           <td className="p-3 text-center">{emp.deviceCount}</td>
                           <td className="p-3 text-center">{emp.avgHours}h</td>
-                          <td className="p-3 text-right">EUR  {emp.monthRevenue}</td>
-                          <td className="p-3 text-right">EUR  {emp.quarterRevenue}</td>
-                          <td className="p-3 text-right font-semibold">EUR  {emp.yearRevenue}</td>
+                          <td className="p-3 text-right">{emp.monthRevenue} ‚Ç¨</td>
+                          <td className="p-3 text-right">{emp.quarterRevenue} ‚Ç¨</td>
+                          <td className="p-3 text-right font-semibold">{emp.yearRevenue} ‚Ç¨</td>
                           <td className="p-3 text-right font-bold text-green-600">
-                            {isFSEGO ? '-' : `EUR  ${emp.monthlyPayout}`}
+                            {isFSEGO ? '-' : `${emp.monthlyPayout} ‚Ç¨`}
                           </td>
                           <td className="p-3 text-center">
                             {editingEmployee !== idx && (
@@ -995,13 +1150,13 @@ const DeviceTracker = ({ onLogout }) => {
                       <td className="p-3">GESAMT</td>
                       <td className="p-3 text-center">{employeeStats.reduce((sum, e) => sum + e.deviceCount, 0)}</td>
                       <td className="p-3 text-center">-</td>
-                      <td className="p-3 text-right">EUR  {employeeStats.reduce((sum, e) => sum + parseFloat(e.monthRevenue), 0).toFixed(2)}</td>
-                      <td className="p-3 text-right">EUR  {employeeStats.reduce((sum, e) => sum + parseFloat(e.quarterRevenue), 0).toFixed(2)}</td>
-                      <td className="p-3 text-right">EUR  {employeeStats.reduce((sum, e) => sum + parseFloat(e.yearRevenue), 0).toFixed(2)}</td>
-                      <td className="p-3 text-right text-emerald-700">EUR  {employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)}</td>
+                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.monthRevenue), 0).toFixed(2)} ‚Ç¨</td>
+                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.quarterRevenue), 0).toFixed(2)} ‚Ç¨</td>
+                      <td className="p-3 text-right">{employeeStats.reduce((sum, e) => sum + parseFloat(e.yearRevenue), 0).toFixed(2)} ‚Ç¨</td>
+                      <td className="p-3 text-right text-emerald-700">{employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)} ‚Ç¨</td>
                       <td className="p-3 text-center">
                         <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
-                          20%: EUR  {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)}
+                          20%: {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)} ‚Ç¨
                         </span>
                       </td>
                     </tr>
@@ -1010,11 +1165,12 @@ const DeviceTracker = ({ onLogout }) => {
               </div>
             </div>
 
+            {/* Monthly Chart */}
             {hasChartData && (
               <div className="bg-white rounded-xl shadow-sm p-4 border">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <TrendingUp size={20} className="text-orange-600" />
-                  Umsatz-Charts {selectedYear}
+                  Monatsumsatz pro Mitarbeiter {selectedYear}
                 </h2>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
@@ -1022,7 +1178,31 @@ const DeviceTracker = ({ onLogout }) => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`EUR ${value}`, '']} />
+                      <Tooltip formatter={(value) => [`${value} ‚Ç¨`, '']} />
+                      <Legend />
+                      {employees.map((emp, idx) => (
+                        <Line key={emp} type="monotone" dataKey={emp} stroke={colors[idx]} strokeWidth={2} dot={{ r: 3 }} />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* Cumulative Chart */}
+            {hasChartData && (
+              <div className="bg-white rounded-xl shadow-sm p-4 border">
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <BarChart3 size={20} className="text-blue-600" />
+                  Kumulierter Jahresumsatz pro Mitarbeiter {selectedYear}
+                </h2>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={cumulativeChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} ‚Ç¨`, '']} />
                       <Legend />
                       {employees.map((emp, idx) => (
                         <Line key={emp} type="monotone" dataKey={emp} stroke={colors[idx]} strokeWidth={2} dot={{ r: 3 }} />
@@ -1067,6 +1247,7 @@ const DeviceTracker = ({ onLogout }) => {
                     {months.map((m, idx) => (
                       <th key={m} className="p-1 text-center font-semibold text-xs">{monthNames[idx]}</th>
                     ))}
+                    <th className="p-2 text-center font-semibold">Status</th>
                     <th className="p-2 text-center font-semibold">ROI</th>
                     <th className="p-2"></th>
                   </tr>
@@ -1074,6 +1255,7 @@ const DeviceTracker = ({ onLogout }) => {
                 <tbody>
                   {devices.map((device, idx) => {
                     const yearTotal = getDeviceYearRevenue(device, selectedYear);
+                    const monthRev = getDeviceCurrentMonthRevenue(device);
                     return (
                       <tr key={device.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="p-1">
@@ -1122,6 +1304,9 @@ const DeviceTracker = ({ onLogout }) => {
                           </td>
                         ))}
                         <td className="p-1">
+                          <TrafficLight revenue={monthRev} />
+                        </td>
+                        <td className="p-1">
                           <ROICircle revenue={yearTotal} target={1500} size={50} />
                         </td>
                         <td className="p-1">
@@ -1148,7 +1333,7 @@ const DeviceTracker = ({ onLogout }) => {
                   <Download size={20} className="text-blue-600 rotate-180" />
                   Umsatz importieren ({selectedYear})
                 </h2>
-                <button onClick={() => { setShowImportModal(false); setImportText(''); }} className="text-gray-500 hover:text-gray-700 text-xl">‚úï</button>
+                <button onClick={() => { setShowImportModal(false); setImportText(''); }} className="text-gray-500 hover:text-gray-700 text-xl">X</button>
               </div>
               <div className="p-4">
                 <div className="mb-4">
@@ -1222,11 +1407,11 @@ const DeviceTracker = ({ onLogout }) => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Gesamtumsatz</div>
-                    <div className="text-2xl font-bold">EUR  {reportData.monthRevenue.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">{reportData.monthRevenue.toFixed(2)} ‚Ç¨</div>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Provision (10%)</div>
-                    <div className="text-2xl font-bold">EUR  {reportData.provision.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">{reportData.provision.toFixed(2)} ‚Ç¨</div>
                   </div>
                 </div>
                 <div className="mb-4">
@@ -1240,7 +1425,7 @@ const DeviceTracker = ({ onLogout }) => {
                     <strong>Top 3 Geraete:</strong>
                     <ul className="list-disc list-inside mt-2">
                       {reportData.top3Devices.map((d, i) => (
-                        <li key={i}>{d.deviceNumber} - EUR  {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)}</li>
+                        <li key={i}>{d.deviceNumber} - {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)} ‚Ç¨</li>
                       ))}
                     </ul>
                   </div>
@@ -1259,7 +1444,7 @@ const DeviceTracker = ({ onLogout }) => {
                   <MapPin size={20} className="text-purple-600" />
                   Adressen verwalten
                 </h2>
-                <button onClick={() => setShowAddressModal(false)} className="text-gray-500 hover:text-gray-700 text-xl">‚úï</button>
+                <button onClick={() => setShowAddressModal(false)} className="text-gray-500 hover:text-gray-700 text-xl">X</button>
               </div>
               <div className="p-4 bg-purple-50 border-b">
                 <h3 className="font-semibold text-sm mb-3">Neue Adresse</h3>
@@ -1306,7 +1491,7 @@ const DeviceTracker = ({ onLogout }) => {
           </div>
         )}
 
-        {/* Trash Modal (Papierkorb) */}
+        {/* Trash Modal */}
         {showTrashModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-auto">
@@ -1322,7 +1507,7 @@ const DeviceTracker = ({ onLogout }) => {
                       Papierkorb leeren
                     </button>
                   )}
-                  <button onClick={() => setShowTrashModal(false)} className="text-gray-500 hover:text-gray-700 text-xl px-2">‚úï</button>
+                  <button onClick={() => setShowTrashModal(false)} className="text-gray-500 hover:text-gray-700 text-xl px-2">X</button>
                 </div>
               </div>
               
@@ -1366,13 +1551,13 @@ const DeviceTracker = ({ onLogout }) => {
                             </div>
                             <div className="mt-2 flex items-center gap-4 text-xs">
                               <span className="text-gray-500">
-                                üóëÔ∏è Geloescht: {formattedDate}
+                                Geloescht: {formattedDate}
                               </span>
                               <span className="text-gray-500">
-                                üë§ Owner: {device.owner || '-'}
+                                Owner: {device.owner || '-'}
                               </span>
                               <span className="text-green-600 font-medium">
-                                üí∞ Umsatz {selectedYear}: EUR {yearRevenue.toFixed(0)}
+                                Umsatz {selectedYear}: {yearRevenue.toFixed(0)} ‚Ç¨
                               </span>
                             </div>
                           </div>
