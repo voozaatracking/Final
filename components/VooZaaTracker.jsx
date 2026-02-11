@@ -1593,4 +1593,3 @@ const DeviceTracker = ({ onLogout }) => {
 };
 
 export default DeviceTracker;
-
