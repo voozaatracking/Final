@@ -1388,8 +1388,8 @@ const DeviceTracker = ({ onLogout }) => {
 
         {/* Report View */}
         {showReport && reportData && (
-          <div className="fixed inset-0 bg-white z-50 overflow-auto">
-            <div className="max-w-4xl mx-auto p-8">
+          <div className="fixed inset-0 bg-white z-50 overflow-auto print:overflow-visible">
+            <div className="max-w-5xl mx-auto p-8">
               <div className="flex justify-between items-center mb-6 print:hidden">
                 <h1 className="text-2xl font-bold">Monatsbericht {reportData.monthName} {reportData.year}</h1>
                 <div className="flex gap-2">
@@ -1401,35 +1401,196 @@ const DeviceTracker = ({ onLogout }) => {
                   </button>
                 </div>
               </div>
-              <div className="border-2 border-gray-300 p-6 rounded-lg">
-                <h2 className="text-xl font-bold text-center mb-4">VooZaa Monatsbericht</h2>
-                <h3 className="text-lg text-center mb-6">{reportData.monthName} {reportData.year}</h3>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
+              
+              {/* Header */}
+              <div className="border-2 border-gray-300 p-6 rounded-lg mb-6">
+                <h2 className="text-2xl font-bold text-center mb-2">VooZaa Monatsbericht</h2>
+                <h3 className="text-xl text-center text-gray-600 mb-6">{reportData.monthName} {reportData.year}</h3>
+                
+                {/* KPI Summary */}
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="bg-blue-50 p-4 rounded-lg text-center">
                     <div className="text-sm text-gray-600">Gesamtumsatz</div>
-                    <div className="text-2xl font-bold">{reportData.monthRevenue.toFixed(2)} EUR</div>
+                    <div className="text-2xl font-bold text-blue-600">{reportData.monthRevenue.toFixed(2)} EUR</div>
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="bg-green-50 p-4 rounded-lg text-center">
                     <div className="text-sm text-gray-600">Provision (10%)</div>
-                    <div className="text-2xl font-bold">{reportData.provision.toFixed(2)} EUR</div>
+                    <div className="text-2xl font-bold text-green-600">{reportData.provision.toFixed(2)} EUR</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg text-center">
+                    <div className="text-sm text-gray-600">Aktive Geraete</div>
+                    <div className="text-2xl font-bold text-purple-600">{reportData.activeDevices.length}</div>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg text-center">
+                    <div className="text-sm text-gray-600">Neue Geraete</div>
+                    <div className="text-2xl font-bold text-orange-600">{reportData.newDevicesArr.length}</div>
                   </div>
                 </div>
-                <div className="mb-4">
-                  <strong>Aktive Geraete:</strong> {reportData.activeDevices.length}
-                </div>
-                <div className="mb-4">
-                  <strong>Neue Geraete:</strong> {reportData.newDevicesArr.length}
-                </div>
-                {reportData.top3Devices.length > 0 && (
-                  <div className="mb-4">
-                    <strong>Top 3 Geraete:</strong>
-                    <ul className="list-disc list-inside mt-2">
-                      {reportData.top3Devices.map((d, i) => (
-                        <li key={i}>{d.deviceNumber} - {getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)} EUR</li>
-                      ))}
-                    </ul>
+
+                {/* Ampel Summary */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-lg mb-3">Ampel-Uebersicht {reportData.monthName}</h4>
+                  <div className="grid grid-cols-5 gap-2">
+                    <div className="text-center p-2 bg-green-100 rounded-lg border border-green-300">
+                      <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e' }}></div>
+                      <div className="text-lg font-bold text-green-700">
+                        {reportData.activeDevices.filter(d => getDeviceRevenue(d, reportData.monthKey, reportData.year) >= 120).length}
+                      </div>
+                      <div className="text-xs text-green-600">Super (120+)</div>
+                    </div>
+                    <div className="text-center p-2 bg-green-50 rounded-lg border border-green-200">
+                      <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#4ade80' }}></div>
+                      <div className="text-lg font-bold text-green-600">
+                        {reportData.activeDevices.filter(d => { const r = getDeviceRevenue(d, reportData.monthKey, reportData.year); return r >= 95 && r < 120; }).length}
+                      </div>
+                      <div className="text-xs text-green-500">Gut (95-120)</div>
+                    </div>
+                    <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#fbbf24' }}></div>
+                      <div className="text-lg font-bold text-yellow-700">
+                        {reportData.activeDevices.filter(d => { const r = getDeviceRevenue(d, reportData.monthKey, reportData.year); return r >= 60 && r < 95; }).length}
+                      </div>
+                      <div className="text-xs text-yellow-600">OK (60-95)</div>
+                    </div>
+                    <div className="text-center p-2 bg-red-50 rounded-lg border border-red-200">
+                      <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#f87171' }}></div>
+                      <div className="text-lg font-bold text-red-500">
+                        {reportData.activeDevices.filter(d => { const r = getDeviceRevenue(d, reportData.monthKey, reportData.year); return r >= 30 && r < 60; }).length}
+                      </div>
+                      <div className="text-xs text-red-400">Schwach (30-60)</div>
+                    </div>
+                    <div className="text-center p-2 bg-red-100 rounded-lg border border-red-300">
+                      <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: '#dc2626' }}></div>
+                      <div className="text-lg font-bold text-red-700">
+                        {reportData.activeDevices.filter(d => getDeviceRevenue(d, reportData.monthKey, reportData.year) < 30).length}
+                      </div>
+                      <div className="text-xs text-red-600">Kritisch (0-30)</div>
+                    </div>
                   </div>
-                )}
+                </div>
+              </div>
+
+              {/* Mitarbeiter Uebersicht */}
+              <div className="border-2 border-gray-300 p-6 rounded-lg mb-6">
+                <h4 className="font-bold text-lg mb-4">Mitarbeiter Uebersicht - {reportData.monthName} {reportData.year}</h4>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-green-100">
+                      <th className="p-2 text-left border">Mitarbeiter</th>
+                      <th className="p-2 text-center border">Geraete</th>
+                      <th className="p-2 text-right border">Monatsumsatz</th>
+                      <th className="p-2 text-right border">Jahresumsatz</th>
+                      <th className="p-2 text-right border">Provision (10%)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employees.map((emp, idx) => {
+                      const empDevices = devices.filter(d => d.owner === emp);
+                      const monthRev = empDevices.reduce((sum, d) => sum + getDeviceRevenue(d, reportData.monthKey, reportData.year), 0);
+                      const yearRev = empDevices.reduce((sum, d) => sum + getDeviceYearRevenue(d, reportData.year), 0);
+                      const provision = monthRev * 0.1;
+                      const isFSEGO = idx === 0;
+                      if (empDevices.length === 0) return null;
+                      return (
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="p-2 border font-medium">{emp} {isFSEGO && <span className="text-xs text-gray-400">(Firma)</span>}</td>
+                          <td className="p-2 border text-center">{empDevices.length}</td>
+                          <td className="p-2 border text-right">{monthRev.toFixed(2)} EUR</td>
+                          <td className="p-2 border text-right">{yearRev.toFixed(2)} EUR</td>
+                          <td className="p-2 border text-right font-bold text-green-600">{isFSEGO ? '-' : `${provision.toFixed(2)} EUR`}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-green-200 font-bold">
+                      <td className="p-2 border">GESAMT</td>
+                      <td className="p-2 border text-center">{devices.length}</td>
+                      <td className="p-2 border text-right">{reportData.monthRevenue.toFixed(2)} EUR</td>
+                      <td className="p-2 border text-right">
+                        {devices.reduce((sum, d) => sum + getDeviceYearRevenue(d, reportData.year), 0).toFixed(2)} EUR
+                      </td>
+                      <td className="p-2 border text-right text-green-700">{reportData.provision.toFixed(2)} EUR</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Alle Geraete mit Ampel und ROI */}
+              <div className="border-2 border-gray-300 p-6 rounded-lg mb-6">
+                <h4 className="font-bold text-lg mb-4">Alle Geraete - {reportData.monthName} {reportData.year}</h4>
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-purple-100">
+                      <th className="p-2 text-left border">Geraet</th>
+                      <th className="p-2 text-left border">Partner</th>
+                      <th className="p-2 text-left border">Owner</th>
+                      <th className="p-2 text-right border">Monat EUR</th>
+                      <th className="p-2 text-center border">Ampel</th>
+                      <th className="p-2 text-right border">Jahr EUR</th>
+                      <th className="p-2 text-center border">ROI %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...devices].sort((a, b) => getDeviceRevenue(b, reportData.monthKey, reportData.year) - getDeviceRevenue(a, reportData.monthKey, reportData.year)).map((device, idx) => {
+                      const monthRev = getDeviceRevenue(device, reportData.monthKey, reportData.year);
+                      const yearRev = getDeviceYearRevenue(device, reportData.year);
+                      const roi = (yearRev / 1500) * 100;
+                      let ampelColor, ampelText;
+                      if (monthRev >= 120) { ampelColor = '#22c55e'; ampelText = 'Super'; }
+                      else if (monthRev >= 95) { ampelColor = '#4ade80'; ampelText = 'Gut'; }
+                      else if (monthRev >= 60) { ampelColor = '#fbbf24'; ampelText = 'OK'; }
+                      else if (monthRev >= 30) { ampelColor = '#f87171'; ampelText = 'Schwach'; }
+                      else { ampelColor = '#dc2626'; ampelText = 'Kritisch'; }
+                      
+                      return (
+                        <tr key={device.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="p-2 border font-medium">{device.deviceNumber || '-'}</td>
+                          <td className="p-2 border">{device.partnerName || '-'}</td>
+                          <td className="p-2 border">{device.owner || '-'}</td>
+                          <td className="p-2 border text-right font-semibold">{monthRev.toFixed(2)} EUR</td>
+                          <td className="p-2 border text-center">
+                            <span className="inline-flex items-center gap-1">
+                              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: ampelColor }}></span>
+                              <span className="text-xs">{ampelText}</span>
+                            </span>
+                          </td>
+                          <td className="p-2 border text-right">{yearRev.toFixed(2)} EUR</td>
+                          <td className={`p-2 border text-center font-bold ${roi >= 100 ? 'text-green-600' : 'text-red-500'}`}>
+                            {roi.toFixed(0)}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Top & Flop */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="border-2 border-green-300 p-4 rounded-lg">
+                  <h4 className="font-bold text-green-700 mb-3">Top 3 Geraete</h4>
+                  {reportData.top3Devices.map((d, i) => (
+                    <div key={i} className="flex justify-between py-1 border-b border-green-100">
+                      <span>{i + 1}. {d.deviceNumber}</span>
+                      <span className="font-bold text-green-600">{getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)} EUR</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-2 border-red-300 p-4 rounded-lg">
+                  <h4 className="font-bold text-red-700 mb-3">Flop 3 Geraete</h4>
+                  {reportData.flop3Devices.map((d, i) => (
+                    <div key={i} className="flex justify-between py-1 border-b border-red-100">
+                      <span>{i + 1}. {d.deviceNumber}</span>
+                      <span className="font-bold text-red-600">{getDeviceRevenue(d, reportData.monthKey, reportData.year).toFixed(2)} EUR</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-6 text-center text-xs text-gray-400">
+                Erstellt am {new Date().toLocaleDateString('de-DE')} - VooZaa Tracking System
               </div>
             </div>
           </div>
