@@ -1510,7 +1510,13 @@ const DeviceTracker = ({ onLogout }) => {
                       <td className="p-2 border text-right">
                         {devices.reduce((sum, d) => sum + getDeviceYearRevenue(d, reportData.year), 0).toFixed(2)} EUR
                       </td>
-                      <td className="p-2 border text-right text-green-700">{reportData.provision.toFixed(2)} EUR</td>
+                      <td className="p-2 border text-right text-green-700">
+                        {employees.slice(1).reduce((sum, emp) => {
+                          const empDevices = devices.filter(d => d.owner === emp);
+                          const monthRev = empDevices.reduce((s, d) => s + getDeviceRevenue(d, reportData.monthKey, reportData.year), 0);
+                          return sum + (monthRev * 0.1);
+                        }, 0).toFixed(2)} EUR
+                      </td>
                     </tr>
                   </tfoot>
                 </table>
