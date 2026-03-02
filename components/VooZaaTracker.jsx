@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Download, Search, Database, Users, BarChart3, TrendingUp, FileText, MapPin, LogOut, Calendar, RotateCcw, Filter } from 'lucide-react';
+import { Plus, Trash2, Download, Search, Database, Users, BarChart3, TrendingUp, FileText, MapPin, LogOut, Calendar, RotateCcw, Filter, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { storage } from '../lib/supabase';
 
@@ -146,6 +146,8 @@ const DeviceTracker = ({ onLogout }) => {
   const [importText, setImportText] = useState('');
   const [newAddress, setNewAddress] = useState({ name: '', street: '', zip: '', city: 'Lueneburg' });
   const [trafficLightFilter, setTrafficLightFilter] = useState('all');
+  const [ampelViewMonth, setAmpelViewMonth] = useState(currentMonth);
+  const [ampelPeriod, setAmpelPeriod] = useState('single');
 
   const deviceTypes = ['12 slot', '24 slot', '28 slot'];
   const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -811,6 +813,13 @@ const DeviceTracker = ({ onLogout }) => {
             <Plus size={16} />
             Geraete bearbeiten
           </button>
+          <button onClick={() => setActiveTab('ampel')}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'ampel' ? 'bg-amber-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-amber-50'
+            }`}>
+            <Activity size={16} />
+            Ampel-Analyse
+          </button>
         </div>
 
         {/* Dashboard Tab */}
@@ -1385,6 +1394,215 @@ const DeviceTracker = ({ onLogout }) => {
                 Schliessen
               </button>
             </div>
+          </div>
+        )}
+
+
+        {/* Ampel-Analyse Tab */}
+        {activeTab === 'ampel' && (
+          <div className="space-y-4">
+            {/* Controls */}
+            <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
+              <div className="flex flex-wrap items-center gap-4">
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Monat</label>
+                  <select
+                    value={ampelViewMonth}
+                    onChange={(e) => setAmpelViewMonth(parseInt(e.target.value))}
+                    className="px-3 py-2 border rounded-lg text-sm font-medium bg-white"
+                  >
+                    {monthNames.map((name, idx) => (
+                      <option key={idx} value={idx}>{name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Zeitraum</label>
+                  <div className="flex gap-1">
+                    {[
+                      { key: 'single', label: 'Einzelmonat' },
+                      { key: '3m', label: '3M Schnitt' },
+                      { key: '6m', label: '6M Schnitt' },
+                      { key: '12m', label: 'Jahres-Schnitt' },
+                    ].map(p => (
+                      <button
+                        key={p.key}
+                        onClick={() => setAmpelPeriod(p.key)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                          ampelPeriod === p.key
+                            ? 'bg-amber-600 text-white shadow'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ampel Content */}
+            {(() => {
+              // Calculate revenue per device for selected period
+              const periodMonths = (() => {
+                if (ampelPeriod === 'single') return 1;
+                if (ampelPeriod === '3m') return 3;
+                if (ampelPeriod === '6m') return 6;
+                return 12;
+              })();
+
+              const getAmpelRevenue = (device) => {
+                let total = 0;
+                let count = 0;
+                for (let i = 0; i < periodMonths; i++) {
+                  const mIdx = ampelViewMonth - i;
+                  if (mIdx >= 0) {
+                    total += getDeviceRevenue(device, months[mIdx], selectedYear);
+                    count++;
+                  }
+                }
+                return count > 0 ? total / count : 0;
+              };
+
+              const ampelDevices = devices.map(d => {
+                const avgRev = getAmpelRevenue(d);
+                const category = getTrafficLightCategory(avgRev);
+                // Trend: compare current period avg vs previous period avg
+                const getPrevPeriodRevenue = () => {
+                  let total = 0;
+                  let count = 0;
+                  for (let i = periodMonths; i < periodMonths * 2; i++) {
+                    const mIdx = ampelViewMonth - i;
+                    if (mIdx >= 0) {
+                      total += getDeviceRevenue(d, months[mIdx], selectedYear);
+                      count++;
+                    }
+                  }
+                  return count > 0 ? total / count : 0;
+                };
+                const prevAvg = getPrevPeriodRevenue();
+                let trend = 'stable';
+                if (prevAvg > 0) {
+                  const change = ((avgRev - prevAvg) / prevAvg) * 100;
+                  if (change > 5) trend = 'up';
+                  else if (change < -5) trend = 'down';
+                }
+                return { ...d, avgRev, category, trend, prevAvg };
+              });
+
+              // Sort: kritisch first, then schwach, ok, gut, super
+              const categoryOrder = { kritisch: 0, schwach: 1, ok: 2, gut: 3, super: 4 };
+              ampelDevices.sort((a, b) => categoryOrder[a.category] - categoryOrder[b.category]);
+
+              const stats = { super: 0, gut: 0, ok: 0, schwach: 0, kritisch: 0 };
+              ampelDevices.forEach(d => stats[d.category]++);
+
+              const periodLabel = ampelPeriod === 'single'
+                ? monthNames[ampelViewMonth]
+                : ampelPeriod === '3m'
+                  ? `3M-Schnitt bis ${monthNames[ampelViewMonth]}`
+                  : ampelPeriod === '6m'
+                    ? `6M-Schnitt bis ${monthNames[ampelViewMonth]}`
+                    : `Jahres-Schnitt bis ${monthNames[ampelViewMonth]}`;
+
+              const trendIcon = (t) => t === 'up' ? '↑' : t === 'down' ? '↓' : '→';
+              const trendColor = (t) => t === 'up' ? 'text-green-600' : t === 'down' ? 'text-red-600' : 'text-gray-400';
+
+              const categoryStyle = {
+                super:    { bg: 'bg-green-100', border: 'border-green-300', text: 'text-green-700', dot: '#22c55e' },
+                gut:      { bg: 'bg-green-50',  border: 'border-green-200', text: 'text-green-600', dot: '#4ade80' },
+                ok:       { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', dot: '#fbbf24' },
+                schwach:  { bg: 'bg-red-50',    border: 'border-red-200', text: 'text-red-500', dot: '#f87171' },
+                kritisch: { bg: 'bg-red-100',   border: 'border-red-300', text: 'text-red-700', dot: '#dc2626' },
+              };
+
+              return (
+                <>
+                  {/* Summary Cards */}
+                  <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
+                    <h3 className="text-sm font-semibold mb-3 text-slate-700">
+                      Ampel-Status: {periodLabel} {selectedYear}
+                    </h3>
+                    <div className="grid grid-cols-5 gap-2">
+                      {Object.entries(categoryStyle).map(([key, style]) => (
+                        <div key={key} className={`text-center p-3 ${style.bg} rounded-lg border ${style.border}`}>
+                          <div className="w-5 h-5 rounded-full mx-auto mb-1" style={{ backgroundColor: style.dot, boxShadow: `0 0 8px ${style.dot}` }}></div>
+                          <div className={`text-2xl font-bold ${style.text}`}>{stats[key]}</div>
+                          <div className="text-xs text-gray-600 capitalize">{key === 'super' ? 'Super' : key === 'gut' ? 'Gut' : key === 'ok' ? 'OK' : key === 'schwach' ? 'Schwach' : 'Kritisch'}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Device Table */}
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-amber-50 border-b-2 border-amber-200">
+                        <tr>
+                          <th className="p-3 text-left font-semibold">Geraet</th>
+                          <th className="p-3 text-left font-semibold">Standort</th>
+                          <th className="p-3 text-left font-semibold">Owner</th>
+                          <th className="p-3 text-right font-semibold">Ø Revenue</th>
+                          <th className="p-3 text-center font-semibold">Ampel</th>
+                          <th className="p-3 text-center font-semibold">Trend</th>
+                          {ampelPeriod !== 'single' && (
+                            <th className="p-3 text-right font-semibold">Vorzeitraum</th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ampelDevices.map((d, idx) => {
+                          const style = categoryStyle[d.category];
+                          return (
+                            <tr key={d.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-amber-50 transition-colors`}>
+                              <td className="p-3 font-medium">{d.deviceNumber}</td>
+                              <td className="p-3 text-gray-600 text-xs">{d.address}</td>
+                              <td className="p-3 text-gray-600">{d.owner}</td>
+                              <td className="p-3 text-right font-semibold">{d.avgRev.toFixed(2)} EUR</td>
+                              <td className="p-3 text-center">
+                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text} border ${style.border}`}>
+                                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: style.dot }}></span>
+                                  {d.category === 'super' ? 'Super' : d.category === 'gut' ? 'Gut' : d.category === 'ok' ? 'OK' : d.category === 'schwach' ? 'Schwach' : 'Kritisch'}
+                                </span>
+                              </td>
+                              <td className={`p-3 text-center text-lg font-bold ${trendColor(d.trend)}`}>
+                                {trendIcon(d.trend)}
+                              </td>
+                              {ampelPeriod !== 'single' && (
+                                <td className="p-3 text-right text-gray-500">{d.prevAvg.toFixed(2)} EUR</td>
+                              )}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Period Comparison Mini-Chart per Category */}
+                  <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
+                    <h3 className="text-sm font-semibold mb-3 text-slate-700">Verteilung nach Kategorie</h3>
+                    <div className="flex gap-2 items-end h-32">
+                      {Object.entries(stats).map(([key, count]) => {
+                        const style = categoryStyle[key];
+                        const maxCount = Math.max(...Object.values(stats), 1);
+                        const height = (count / maxCount) * 100;
+                        return (
+                          <div key={key} className="flex-1 flex flex-col items-center gap-1">
+                            <span className={`text-sm font-bold ${style.text}`}>{count}</span>
+                            <div
+                              className={`w-full rounded-t-lg ${style.bg} border ${style.border}`}
+                              style={{ height: `${Math.max(height, 4)}%` }}
+                            ></div>
+                            <span className="text-xs text-gray-500 capitalize">{key === 'super' ? 'Super' : key === 'gut' ? 'Gut' : key === 'ok' ? 'OK' : key === 'schwach' ? 'Schwach' : 'Krit.'}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         )}
 
