@@ -610,7 +610,7 @@ const DeviceTracker = ({ onLogout }) => {
     URL.revokeObjectURL(url);
   };
 
-  const totalRevenue = devices.reduce((sum, d) => sum + months.reduce((mSum, m) => mSum + getDeviceRevenue(d, m, selectedYear), 0), 0);
+  <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenue * 0.1).toFixed(0)} EUR</div>
   const currentMonthRevenue = devices.reduce((sum, d) => sum + getDeviceRevenue(d, months[currentMonth], selectedYear), 0);
   const quarterRevenue = devices.reduce((sum, d) => sum + quarterMonths.reduce((qSum, m) => qSum + getDeviceRevenue(d, m, selectedYear), 0), 0);
   const activeDevices = devices.filter(d => months.some(m => getDeviceRevenue(d, m, selectedYear) > 0)).length;
