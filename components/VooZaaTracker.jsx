@@ -481,7 +481,7 @@ const DeviceTracker = ({ onLogout }) => {
       const monthRevenue = empDevices.reduce((sum, d) => sum + getDeviceRevenue(d, months[employeeViewMonth], selectedYear), 0);
       const quarterRevenue = empDevices.reduce((sum, d) => sum + selectedQuarterMonths.reduce((qSum, m) => qSum + getDeviceRevenue(d, m, selectedYear), 0), 0);
       const yearRevenue = empDevices.reduce((sum, d) => sum + yearMonthsUntilSelected.reduce((ySum, m) => ySum + getDeviceRevenue(d, m, selectedYear), 0), 0);
-      const monthlyPayout = monthRevenue * 0.1;
+      const monthlyPayout = monthRevenue * 0.2;
 
       return {
         name: emp, deviceCount, avgHours: avgHours.toFixed(1),
@@ -610,7 +610,8 @@ const DeviceTracker = ({ onLogout }) => {
     URL.revokeObjectURL(url);
   };
 
-  <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenue * 0.1).toFixed(0)} EUR</div>
+  const totalRevenue = devices.reduce((sum, d) => sum + months.reduce((mSum, m) => mSum + getDeviceRevenue(d, m, selectedYear), 0), 0);
+  const totalRevenueExclFSEGO = devices.filter(d => d.owner !== employees[0]).reduce((sum, d) => sum + months.reduce((mSum, m) => mSum + getDeviceRevenue(d, m, selectedYear), 0), 0);
   const currentMonthRevenue = devices.reduce((sum, d) => sum + getDeviceRevenue(d, months[currentMonth], selectedYear), 0);
   const quarterRevenue = devices.reduce((sum, d) => sum + quarterMonths.reduce((qSum, m) => qSum + getDeviceRevenue(d, m, selectedYear), 0), 0);
   const activeDevices = devices.filter(d => months.some(m => getDeviceRevenue(d, m, selectedYear) > 0)).length;
@@ -638,7 +639,8 @@ const DeviceTracker = ({ onLogout }) => {
     const monthName = monthNames[monthIndex];
     
     const monthRevenue = devices.reduce((sum, d) => sum + getDeviceRevenue(d, monthKey, selectedYear), 0);
-    const provision = monthRevenue * 0.1;
+    const monthRevenueExclFSEGO = devices.filter(d => d.owner !== employees[0]).reduce((sum, d) => sum + getDeviceRevenue(d, monthKey, selectedYear), 0);
+    const provision = monthRevenueExclFSEGO * 0.2;
     
     const prevMonthKey = monthIndex > 0 ? months[monthIndex - 1] : null;
     const prevMonthRevenue = prevMonthKey 
@@ -819,7 +821,7 @@ const DeviceTracker = ({ onLogout }) => {
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">Jahresumsatz {selectedYear}</div>
                 <div className="text-2xl font-bold text-slate-800">{totalRevenue.toFixed(0)} EUR</div>
-                <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenue * 0.1).toFixed(0)} EUR</div>
+                <div className="text-xs text-green-600 font-medium">Provision: {(totalRevenueExclFSEGO * 0.2).toFixed(0)} EUR</div>
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide">{monthNames[currentMonth]} {selectedYear}</div>
@@ -1101,7 +1103,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <th className="p-3 text-right font-semibold">{monthNames[employeeViewMonth]}</th>
                       <th className="p-3 text-right font-semibold">Q{Math.floor(employeeViewMonth / 3) + 1}</th>
                       <th className="p-3 text-right font-semibold">Jahr</th>
-                      <th className="p-3 text-right font-semibold">10%</th>
+                      <th className="p-3 text-right font-semibold">20%</th>
                       <th className="p-3 text-center font-semibold">Aktion</th>
                     </tr>
                   </thead>
@@ -1156,7 +1158,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <td className="p-3 text-right text-emerald-700">{employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)} EUR</td>
                       <td className="p-3 text-center">
                         <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
-                          20%: {(employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0) * 2).toFixed(2)} EUR
+                          20%: {employeeStats.slice(1).reduce((sum, e) => sum + parseFloat(e.monthlyPayout), 0).toFixed(2)} EUR
                         </span>
                       </td>
                     </tr>
@@ -1414,7 +1416,7 @@ const DeviceTracker = ({ onLogout }) => {
                     <div className="text-2xl font-bold text-blue-600">{reportData.monthRevenue.toFixed(2)} EUR</div>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg text-center">
-                    <div className="text-sm text-gray-600">Provision (10%)</div>
+                    <div className="text-sm text-gray-600">Provision (20%)</div>
                     <div className="text-2xl font-bold text-green-600">{reportData.provision.toFixed(2)} EUR</div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg text-center">
@@ -1480,7 +1482,7 @@ const DeviceTracker = ({ onLogout }) => {
                       <th className="p-2 text-center border">Geraete</th>
                       <th className="p-2 text-right border">Monatsumsatz</th>
                       <th className="p-2 text-right border">Jahresumsatz</th>
-                      <th className="p-2 text-right border">Provision (10%)</th>
+                      <th className="p-2 text-right border">Provision (20%)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1488,7 +1490,7 @@ const DeviceTracker = ({ onLogout }) => {
                       const empDevices = devices.filter(d => d.owner === emp);
                       const monthRev = empDevices.reduce((sum, d) => sum + getDeviceRevenue(d, reportData.monthKey, reportData.year), 0);
                       const yearRev = empDevices.reduce((sum, d) => sum + getDeviceYearRevenue(d, reportData.year), 0);
-                      const provision = monthRev * 0.1;
+                      const provision = monthRev * 0.2;
                       const isFSEGO = idx === 0;
                       if (empDevices.length === 0) return null;
                       return (
@@ -1514,7 +1516,7 @@ const DeviceTracker = ({ onLogout }) => {
                         {employees.slice(1).reduce((sum, emp) => {
                           const empDevices = devices.filter(d => d.owner === emp);
                           const monthRev = empDevices.reduce((s, d) => s + getDeviceRevenue(d, reportData.monthKey, reportData.year), 0);
-                          return sum + (monthRev * 0.1);
+                          return sum + (monthRev * 0.2);
                         }, 0).toFixed(2)} EUR
                       </td>
                     </tr>
@@ -1760,4 +1762,3 @@ const DeviceTracker = ({ onLogout }) => {
 };
 
 export default DeviceTracker;
-
